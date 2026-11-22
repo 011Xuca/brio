@@ -1,0 +1,22 @@
+# Revisa que todos los .ps1 se puedan leer con el PowerShell que trae Windows (5.1). Es la prueba mínima: atrapa
+# llaves sin cerrar, comillas mal puestas, etc. No prueba que las opciones hagan lo que dicen.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  sintaxis:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Revisar sintaxis de los .ps1
+        shell: powershell
+        run: |
+          $mal = 0
+          Get-ChildItem -Recurse -Filter *.ps1 | ForEach-Object {
+            $err = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$err)
+            if ($err) { $mal++; $err | ForEach-Object { Write-Host "$($_.Extent.File):$($_.Extent.StartLineNumber) $($_.Message)" } }
+          }
+          if ($mal) { exit 1 }
