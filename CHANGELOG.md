@@ -74,11 +74,9 @@ Todo lo que cambió en cada versión de **Brío**. La más nueva va arriba.
 - El changelog y los textos de carga salen en tu idioma.
 - Se quitó **Medir FPS antes y después**. Los ajustes de la BIOS siguen en Herramientas.
 - Se marcan las opciones que pueden **impedir actualizar a 26H2** (inventario de compatibilidad, tareas de diagnóstico, telemetría en hosts, Windows Update apagado o en pausa).
-- Xuca OPtimizer se renombró a **Brío** (repo github.com/011Xuca/brio).
 - Color propio: azul cielo (#60A5FA en oscuro, #1D4ED8 en claro) en botones, bordes, selección y en el icono (borde y dibujo). El fondo de la app pasa al gris oscuro del icono.
 - Los datos de la app (preferencias, logs de lectura, programitas de Gaming y sus tareas) pasan a ProgramData\Brio. La primera vez que abre se mudan solos, sin perder nada, y los programitas que estaban andando se vuelven a prender.
 - Apps recomendadas: la tarjeta del monitor de la PC ahora es **Pulso** (github.com/011Xuca/pulso).
-- Si tenías Xuca OPtimizer, se actualiza solo a Brío desde el cartel de actualización: baja la app nueva y el acceso directo del escritorio pasa a llamarse Brío.
 
 ### Arreglado
 - **Windows "no activado" o "no original" con cuenta local**: "Apagar instalaciones de la Store" apagaba LicenseManager, que usa la activación. Ya no se apaga, ninguna opción puede apagar `sppsvc`, `ClipSVC`, `LicenseManager`, `wlidsvc` ni `KeyIso` ni las tareas de licencia, el archivo hosts nunca bloquea los servidores de activación, y si alguno quedó apagado por una versión vieja se arregla solo.
