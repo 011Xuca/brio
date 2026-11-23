@@ -74,11 +74,9 @@ English changelog of **Brío** (the app shows the section of your version when t
 - The changelog and loading texts show up in your language.
 - **Measure FPS before and after** was removed. BIOS settings are still in Tools.
 - Options that can **block updating to 26H2** are flagged (compatibility inventory, diagnostic tasks, telemetry in hosts, Windows Update off or paused).
-- Xuca OPtimizer was renamed **Brío** (repo github.com/011Xuca/brio).
 - Own color: sky blue (#60A5FA in dark, #1D4ED8 in light) in buttons, borders, selection and the icon (border and drawing). The app background becomes the icon's dark grey.
 - App data (preferences, reading logs, Gaming helper programs and their tasks) moves to ProgramData\Brio. The first time it opens they move on their own, losing nothing, and the helper programs that were running are turned on again.
 - Recommended apps: the PC monitor card is now **Pulso** (github.com/011Xuca/pulso).
-- If you had Xuca OPtimizer, it updates itself to Brío from the update prompt: it downloads the new app and the desktop shortcut is renamed Brío.
 
 ### Fixed
 - **Windows "not activated" or "not genuine" on a local account**: "Turn off Store installs" turned off LicenseManager, which activation uses. It is no longer turned off, no option can turn off `sppsvc`, `ClipSVC`, `LicenseManager`, `wlidsvc` or `KeyIso` or the license tasks, the hosts file never blocks activation servers, and if any was left off by an old version it is fixed automatically.

@@ -97,99 +97,6 @@ $ArchivosUpd = @(
 )
 
 # ------------------------------------------------------------
-# Datos de la app: desde la 1.0.13 van en ProgramData\Brio (antes ProgramData\XucaScripts).
-# Se pasan una sola vez, la primera vez que abre Brio. Los programitas de Gaming que estaban andando (temporizador,
-# limpieza de RAM, afinidad) se apagan, se mueve todo, se compilan de nuevo con su nombre nuevo y se vuelven a prender
-# con la misma tarea (con el nombre nuevo). Lo mismo con la tarea de la placa NVIDIA y las marcas del registro.
-# Si algo queda trabado, la carpeta vieja no se borra y se vuelve a intentar la proxima vez que abras la app.
-# ------------------------------------------------------------
-function Migrar-Datos([string]$viejo, [string]$nuevo) {
-    # Ya se hizo y no queda carpeta vieja: no se revisa nada (asi no tarda al abrir)
-    $marca = Join-Path $nuevo 'migrado.txt'
-    $vi = Get-Item -LiteralPath $viejo -Force -ErrorAction SilentlyContinue
-    if ((-not $vi) -and (Test-Path -LiteralPath $marca)) { return }
-    $raiz = $null
-    try { $sv = New-Object -ComObject Schedule.Service; $sv.Connect(); $raiz = $sv.GetFolder('\') } catch { }
-    # 1) Tareas viejas (aunque ya no este la carpeta): se guarda como estaban (XML), se borran y se cierran sus programas.
-    #    Son todas las que creo la app con el nombre viejo; la de otras apps (por ejemplo XucaMonitor_Inicio) no se toca.
-    $tareas = @(@('XucaTimer', 'BrioTimer', 'CodTimer'), @('XucaRAM', 'BrioRAM', 'CodRam'), @('XucaAfinidad', 'BrioAfinidad', 'CodAfi'), @('XucaGPU', 'BrioGPU', ''))
-    $xml = @{}
-    foreach ($t in $tareas) {
-        if ($raiz) {
-            $tk = $null
-            try { $tk = $raiz.GetTask($t[0]) } catch { }
-            if ($tk) { $xml[$t[0]] = [string]$tk.Xml; try { $tk.Stop(0) } catch { }; try { $raiz.DeleteTask($t[0], 0) } catch { } }
-        }
-        Get-Process -Name $t[0] -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-    }
-    if ($xml.Count -gt 0) { Start-Sleep -Milliseconds 500 }
-    # 2) Mover los datos. Lo que ya este en la carpeta nueva no se pisa.
-    #    Solo una carpeta de verdad: un enlace nunca se borra de forma recursiva (se llevaria lo de adentro del destino).
-    #    Si esto falla, igual se sigue con el paso 3: las tareas ya se borraron y solo quedan guardadas en $xml.
-    try {
-        if (-not (Test-Path -LiteralPath $nuevo)) { New-Item -ItemType Directory -Path $nuevo -Force | Out-Null }
-        if ($vi -and (($vi.Attributes -band [IO.FileAttributes]::ReparsePoint) -eq 0)) {
-            & robocopy.exe $viejo $nuevo /E /MOVE /XC /XN /XO /R:2 /W:1 /NFL /NDL /NJH /NJS /NP 2>&1 | Out-Null
-            # Lo que quede en la vieja tiene que estar repetido en la nueva para borrarla; si no, se reintenta la proxima vez
-            $quedan = @(Get-ChildItem -LiteralPath $viejo -Recurse -Force -File -ErrorAction SilentlyContinue | Where-Object { -not (Test-Path -LiteralPath (Join-Path $nuevo $_.FullName.Substring($viejo.Length).TrimStart('\'))) })
-            if ($quedan.Count -eq 0) { Remove-Item -LiteralPath $viejo -Recurse -Force -ErrorAction SilentlyContinue }
-        }
-    } catch { }
-    # 3) Los programitas que estaban: el .exe nuevo se compila del codigo de esta version y la tarea es la misma con otro nombre
-    if ($raiz -and ($xml.Count -gt 0)) {
-        $prog = ''
-        try { $prog = [regex]::Match([IO.File]::ReadAllText($Rutas.Gaming), '(?s)# >>> XUCA-PROGRAMAS.*?# <<< XUCA-PROGRAMAS').Value } catch { }
-        if ($prog) { . ([scriptblock]::Create($prog)) }
-        foreach ($t in $tareas) {
-            if (-not $xml.ContainsKey($t[0])) { continue }
-            $x = $xml[$t[0]]
-            if ($t[2]) {
-                $exeV = Join-Path $nuevo ($t[0] + '.exe'); $exe = Join-Path $nuevo ($t[1] + '.exe')
-                Remove-Item -LiteralPath $exeV, ($exeV + '.ver') -Force -ErrorAction SilentlyContinue
-                $cod = Get-Variable -Name $t[2] -ValueOnly -ErrorAction SilentlyContinue
-                if (-not $cod) { continue }
-                try {
-                    if (-not (Test-Path -LiteralPath $exe)) { Add-Type -TypeDefinition $cod -Language CSharp -OutputAssembly $exe -OutputType WindowsApplication -ErrorAction Stop }
-                    Ver-Guardar $exe $cod
-                } catch { continue }
-                $x = [regex]::Replace($x, '(?is)<Command>.*?</Command>', ('<Command>' + [Security.SecurityElement]::Escape($exe) + '</Command>'))
-            }
-            # Todas estas tareas corren como SYSTEM (5 = cuenta de servicio)
-            try { [void]$raiz.RegisterTask($t[1], $x, 6, 'SYSTEM', $null, 5); if ($t[2]) { [void]$raiz.GetTask($t[1]).Run($null) } } catch { }
-        }
-    }
-    # 4) Marcas del registro: la prioridad alta de cada juego y la cuenta que se reabre al volver a entrar
-    $ifeo = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options'
-    foreach ($k in @(Get-ChildItem -LiteralPath $ifeo -ErrorAction SilentlyContinue)) {
-        $po = $k.PSPath + '\PerfOptions'
-        try {
-            if ((Get-ItemProperty -LiteralPath $po -Name 'XucaPrioridad' -ErrorAction Stop).XucaPrioridad -eq 1) {
-                New-ItemProperty -LiteralPath $po -Name 'BrioPrioridad' -Value 1 -PropertyType DWord -Force | Out-Null
-                Remove-ItemProperty -LiteralPath $po -Name 'XucaPrioridad' -ErrorAction SilentlyContinue
-            }
-        } catch { }
-    }
-    $ro = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
-    try {
-        $c = (Get-ItemProperty -LiteralPath $ro -Name 'XucaCuenta' -ErrorAction Stop).XucaCuenta
-        Set-ItemProperty -LiteralPath $ro -Name 'BrioCuenta' -Value $c
-        Remove-ItemProperty -LiteralPath $ro -Name 'XucaCuenta' -ErrorAction SilentlyContinue
-    } catch { }
-    # 5) Que no quede ninguna tarea con el nombre viejo (si alguna no se dejo borrar antes, se prueba de nuevo)
-    $quedanT = 0
-    if ($raiz) {
-        foreach ($t in $tareas) {
-            $tk = $null
-            try { $tk = $raiz.GetTask($t[0]) } catch { }
-            if ($tk) { try { $tk.Stop(0) } catch { }; try { $raiz.DeleteTask($t[0], 0) } catch { $quedanT++ } }
-        }
-    }
-    # Hecho: la proxima vez no se revisa (si quedo algo, se reintenta)
-    if ((-not (Test-Path -LiteralPath $viejo)) -and ($quedanT -eq 0)) { try { Set-Content -LiteralPath $marca -Value (Get-Date -Format 'yyyy-MM-dd HH:mm') -Encoding ASCII } catch { } }
-}
-try { Migrar-Datos (Join-Path $env:ProgramData 'XucaScripts') (Join-Path $env:ProgramData 'Brio') } catch { }
-
-# ------------------------------------------------------------
 # Preferencias de la app (idioma y mensaje de Ko-fi). Se guardan en ProgramData\Brio\app_config.txt
 # ------------------------------------------------------------
 $ConfigArchivo = Join-Path (Join-Path $env:ProgramData 'Brio') 'app_config.txt'
@@ -6605,7 +6512,7 @@ if (-not $bajar) {
     # Mantiene vivo el contador de descargas de la pagina (solo lo lee, no suma ni manda datos).
     # Se manda sin esperar la respuesta: si esa pagina anda lenta, la app no tarda mas en abrir.
     try {
-        $rc = [Net.HttpWebRequest]::Create('https://abacus.jasoncameron.dev/get/011xuca/xuca-optimizer-instalaciones')
+        $rc = [Net.HttpWebRequest]::Create('https://abacus.jasoncameron.dev/get/011xuca/brio-instalaciones')
         $rc.Timeout = 3000; $rc.ReadWriteTimeout = 3000; $rc.UserAgent = 'Brio'
         [void]$rc.BeginGetResponse($null, $null)
     } catch { }

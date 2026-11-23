@@ -2,8 +2,6 @@
 
 # Brío
 
-> Formerly **xuca-optimizer (Xuca Optimizer)**: if you were searching for that name, this is the app.
-
 Free optimizer for **Windows 10 and 11**. It's a checkbox app: tick what you want and click **Apply**. Before touching anything it reads your PC: it shows what you already have applied and greys out whatever isn't compatible. Every option explains what it does, what you gain and what you lose.
 
 <!-- DEMO GIF: record it, save it as docs/demo.gif and delete the two comment markers on the next line -->
@@ -87,8 +85,6 @@ If it helped you, you can support me on Ko-fi: https://ko-fi.com/011xuca
 ---
 
 ## 🇪🇸 Español
-
-> Antes se llamaba **xuca-optimizer (Xuca Optimizer)**: si lo buscabas con ese nombre, es esta app.
 
 Optimizador gratis para **Windows 10 y 11**. Es una app con casillas: marcás lo que querés y tocás **Aplicar**. Antes de tocar nada lee tu PC: te muestra lo que ya tenés aplicado y deja en gris lo que no es compatible. Cada opción te explica qué hace, qué ganás y qué perdés.
 
