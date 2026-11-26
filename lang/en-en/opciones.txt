@@ -377,6 +377,11 @@ Hace: Windows stops lowering the game volume when there's a call, for example on
 Favor: the game always sounds the same.
 Contra: none.
 
+[Gaming mae]
+Titulo: Turn off microphone audio enhancements
+Hace: turns off Windows audio enhancements on your active microphones (the same switch as Settings, System, Sound, microphone Properties).
+Favor: your voice reaches Discord, OBS or the game unprocessed, with no clipping or volume changes; best if you already use the app's noise filter.
+Contra: you lose the noise cancellation and the effects from Windows or the microphone maker.
 [Gaming mm]
 Titulo: Game priority
 Hace: the Windows multimedia scheduler gives games more priority. The network limit stays at 10, the Windows value, because removing it can make latency worse.

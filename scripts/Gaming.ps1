@@ -213,6 +213,18 @@ public class P {
 function Afi-Bit([long]$m, [int]$i) { return (($m -band ([long]1 -shl $i)) -ne 0) }
 function Afi-BitBajo([long]$m) { for ($i = 0; $i -lt 64; $i++) { if (Afi-Bit $m $i) { return $i } }; return 64 }
 function Afi-Hilos([long]$m) { $c = 0; for ($i = 0; $i -lt 64; $i++) { if (Afi-Bit $m $i) { $c++ } }; return $c }
+# Micrófonos activos (DeviceState 1) y su interruptor de "Mejoras de audio": {1da5d803-...},5 en FxProperties (1 = apagadas, 0 = encendidas).
+# Las claves son de SYSTEM, asi que se escriben con Como-Sistema.
+function Mic-Endpoints {
+    $b = 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Capture\'
+    return @(Get-ChildItem ('Registry::' + $b) -ErrorAction SilentlyContinue | Where-Object { (Get-ItemProperty -LiteralPath $_.PSPath -ErrorAction SilentlyContinue).DeviceState -eq 1 } | ForEach-Object { $b + $_.PSChildName + '\FxProperties' })
+}
+function Mic-Mejoras([string]$k, [int]$v) {
+    $n = '{1da5d803-d492-4edd-8c23-e0c0ffee7f0e},5'
+    $script:OptT++
+    if ((Como-Sistema ('reg add "' + $k + '" /v "' + $n + '" /t REG_DWORD /d ' + $v + ' /f')) -and ((Get-ItemProperty -LiteralPath ('Registry::' + $k) -ErrorAction SilentlyContinue).$n -eq $v)) { Log 'OK' ($k + ' = ' + $v) }
+    else { $script:OptF++; Log 'FALLO' ('no se pudo cambiar las mejoras de audio de ' + $k) }
+}
 function Afi-Lista([long]$m) {
     $idx = @(); for ($i = 0; $i -lt 64; $i++) { if (Afi-Bit $m $i) { $idx += $i } }
     $partes = @(); $i = 0
@@ -2691,6 +2703,23 @@ $ListaOpciones = @(
             Opt-Ini 'Comunicaciones de Windows (restaurar)'
             Reg-Set 'HKCU\Software\Microsoft\Multimedia\Audio' 'UserDuckingPreference' 'REG_DWORD' '1'
             Opt-Fin 'Windows vuelve a reducir un 80 por ciento el resto de los sonidos'
+        }
+    },
+    @{
+        Id = 'mae'; Seccion = 'SONIDO'
+        Q = '- Desea apagar las mejoras de audio del microfono? (Configuracion, Sistema, Sonido, tu microfono, Mejoras de audio)'
+        Hace = 'apaga las mejoras de audio de Windows en tus microfonos activos (el mismo interruptor de Configuracion, Sistema, Sonido, Propiedades del microfono).'
+        Favor = 'tu voz llega sin procesar a Discord, OBS o el juego, sin recortes ni cambios de volumen; es lo mejor si ya usas el filtro de ruido de la app.'
+        Contra = 'se pierden la cancelacion de ruido y los efectos de Windows o del fabricante del microfono.'
+        S = {
+            Opt-Ini 'Mejoras de audio del microfono'
+            foreach ($k in (Mic-Endpoints)) { Mic-Mejoras $k 1 }
+            Opt-Fin 'Mejoras de audio del microfono apagadas (si no lo notas, reabri la app que usa el micro)'
+        }
+        R = {
+            Opt-Ini 'Mejoras de audio del microfono (restaurar)'
+            foreach ($k in (Mic-Endpoints)) { Mic-Mejoras $k 0 }
+            Opt-Fin 'Mejoras de audio del microfono encendidas'
         }
     },
     @{
