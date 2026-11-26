@@ -2510,6 +2510,8 @@ en: Your board ({0} chipset) does not support it: Intel needs a 400 series board
 
 es: Tu placa (chipset {0}) lo tiene solo con una BIOS nueva: si no ves la opcion, actualiza la BIOS desde la pagina de tu placa.
 en: Your board ({0} chipset) only has it with a new BIOS: if you do not see the option, update the BIOS from your board's page.
+es: Tu BIOS es de {0}: si es vieja, seguro no la tiene.
+en: Your BIOS is from {0}: if it is old, it surely does not have it.
 
 es: Con tu placa (chipset {0}) depende del modelo: algunas lo agregaron con una BIOS nueva y otras nunca. Fijate en la pagina de tu placa.
 en: With your board ({0} chipset) it depends on the model: some added it with a new BIOS and others never did. Check your board's page.

@@ -365,7 +365,7 @@ $TitulosCortos = @{
     'Gaming|idle' = 'Nucleos siempre despiertos'; 'Gaming|fso' = 'Sin optimizacion de pantalla completa'; 'Gaming|msi' = 'Modo MSI'
     'Gaming|pca' = 'Apagar el Asistente de compatibilidad'; 'Gaming|ram' = 'Limpieza automatica de RAM'; 'Gaming|dsk' = 'Discos siempre encendidos'
     'Gaming|nag' = 'Paquetes sin espera (Nagle)'; 'Gaming|dns' = 'DNS mas rapido'; 'Gaming|avl' = 'Antivirus con menos CPU'
-    'Gaming|spc' = 'Desactivar Spectre y Meltdown'; 'Gaming|du' = 'Volumen fijo en llamadas'; 'Gaming|tk' = 'Sin atajos de accesibilidad'
+    'Gaming|spc' = 'Desactivar Spectre y Meltdown'; 'Gaming|du' = 'Volumen fijo en llamadas'; 'Gaming|mae' = 'Mejoras de audio del microfono'; 'Gaming|tk' = 'Sin atajos de accesibilidad'
     'Gaming|md' = 'Menus sin retraso'; 'Gaming|dtk' = 'Destrabar teclado'; 'Gaming|foc' = 'Modo foco'; 'Gaming|fsm' = 'Modo foco sin programa (antitrampas)'; 'Gaming|vpf' = 'Velocidad del puntero fija'; 'Gaming|esc' = 'Escala segun la resolucion'
 }
 # Favoritas de la comunidad: llevan una estrella y el nombre con el que se las conoce
@@ -846,6 +846,7 @@ $Chequeos = @{
     'Gaming|ms'     = { ((Leer-Reg 'HKCU:\Control Panel\Mouse' 'MouseSpeed') -eq '0') -and ((Leer-Reg 'HKCU:\Control Panel\Mouse' 'MouseThreshold1') -eq '0') }
     'Gaming|tk'     = { (Leer-Reg 'HKCU:\Control Panel\Accessibility\StickyKeys' 'Flags') -eq '506' }
     'Gaming|du'     = { (Leer-Reg 'HKCU:\Software\Microsoft\Multimedia\Audio' 'UserDuckingPreference') -eq 3 }
+    'Gaming|mae'    = { $b = 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Capture\'; $m = @(Get-ChildItem $b -ErrorAction SilentlyContinue | Where-Object { (Get-ItemProperty -LiteralPath $_.PSPath -ErrorAction SilentlyContinue).DeviceState -eq 1 }); ($m.Count -gt 0) -and (@($m | Where-Object { (Get-ItemProperty -LiteralPath ($_.PSPath + '\FxProperties') -ErrorAction SilentlyContinue).'{1da5d803-d492-4edd-8c23-e0c0ffee7f0e},5' -ne 1 }).Count -eq 0) }
     'Gaming|mm'     = { ((Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games' 'Scheduling Category') -eq 'High') -and ((Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' 'SystemResponsiveness') -eq 10) }
     'Gaming|pri'    = { (Prio-Actuales).Count -gt 0 }
     'Gaming|afi'    = { Prog-Estado 'BrioAfinidad' 'BrioAfinidad.exe' $CodAfi }
@@ -1094,10 +1095,12 @@ $Compat = {
         }
         $editOk = 'Core', 'CoreSingleLanguage', 'Professional', 'ProfessionalN', 'ProfessionalWorkstation', 'ProfessionalEducation', 'Enterprise', 'EnterpriseN', 'Education', 'EducationN', 'ServerStandard', 'ServerDatacenter', 'CloudEdition'
         if ($i.Edicion -and ($editOk -notcontains $i.Edicion)) { $mot.Add('edicion de Windows poco comun: ' + $i.Edicion) }
-        $txtCv = (([string](Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' 'RegisteredOwner')) + ' ' + ([string](Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' 'ProductName'))).ToLower()
-        foreach ($pal in 'tiny', 'atlas', 'revi', 'ghost', 'lite', 'mini', 'kernel', 'custom') {
-            if ($txtCv.Contains($pal)) { $mot.Add('el nombre de la edicion o el propietario registrado tiene palabras de versiones modificadas'); break }
-        }
+        # Nombres en clave de versiones modificadas (en el nombre de la edicion, el propietario, la organizacion, el fabricante OEM o carpetas que dejan)
+        $cvk = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+        $txtCv = ((@('RegisteredOwner', 'RegisteredOrganization', 'ProductName', 'BuildLabEx') | ForEach-Object { [string](Leer-Reg $cvk $_) }) + ([string](Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation' 'Manufacturer'))) -join ' '
+        $nomClave = '(?i)\b(tiny\s*1[01]|nano\s*11|atlas\s*os|atlas|revi\s*os|reviOS|ghost\s*spectre|ghost|x-?lite|lite\s*os|super\s*lite|windows\s*1[01]\s*lite|ameliorated|bloatynosy|nexus\s*os|gamer\s*os|playbook|custom)\b'
+        if ($txtCv -match $nomClave) { $mot.Add('el nombre de la edicion, el propietario o la organizacion tiene el nombre de una version modificada (' + $Matches[1] + ')') }
+        elseif (@('C:\AtlasModules', 'C:\Windows\AtlasModules', 'C:\Windows\AtlasDesktop', 'C:\ReviOS' | Where-Object { Test-Path -LiteralPath $_ }).Count -gt 0) { $mot.Add('hay carpetas de AtlasOS o ReviOS en el disco') }
         $i.Orig = @($mot | Select-Object -Unique)
         Lap 'Compat: Windows original'
     Sumar
@@ -1236,7 +1239,6 @@ try {
         $Sync.Tiempos['Principal: chequeos de la placa de red'] = $swM.ElapsedMilliseconds; $swM.Restart()
     }
     if ($i -is [hashtable]) {
-        if (($global:XAppx.Count -gt 0) -and ($global:XAppx -notcontains 'Microsoft.WindowsStore')) { $i.Orig = @(@($i.Orig) + 'no esta la Microsoft Store, tipico de versiones recortadas' | Select-Object -Unique) }
         $Sync.Info = $i
     }
     $Sync.Paso = 'Ultimos detalles'
@@ -3114,7 +3116,7 @@ $OrdenOpc = @{
         # Latencia, red, mouse y DNS
         'tr', 'pe', 'nic', 'dup', 'wf', 'nag', 'v4', 'pci', 'dsk', 'ms', 'vpf', 'esc', 'dns',
         # Comodidad
-        'tk', 'dtk', 'foc', 'fsm', 'du', 'wsr', 'stg', 'ext', 'hid', 'md'
+        'tk', 'dtk', 'foc', 'fsm', 'du', 'mae', 'wsr', 'stg', 'ext', 'hid', 'md'
     )
 }
 foreach ($k in 'Debloat', 'Gaming') {
@@ -3810,7 +3812,8 @@ function Compat-Bios($pl) {
         $letra = $Matches[1].ToUpper(); $serie = [int]$Matches[2]
         $c.Chipset = ($Matches[0]).ToUpper()
         if ($pl.Cpu -eq 'amd') {
-            $c.RebarPlaca = $(switch ($serie) { 3 { $(if ($letra -eq 'A') { 'no' } else { 'quizas' }) } 4 { 'bios' } default { $(if ($serie -ge 5) { 'si' } else { $null }) } })
+            # AMD: casi ninguna placa (A, B, X de las series 400, 500 y 600) lo tuvo de fabrica: lo agregaron con BIOS nuevas. Recien las series 800 en adelante lo traen.
+            $c.RebarPlaca = $(switch ($serie) { 3 { $(if ($letra -eq 'A') { 'no' } else { 'quizas' }) } { $_ -in 4, 5, 6, 7 } { 'bios' } default { $(if ($serie -ge 8) { 'si' } else { $null }) } })
         } elseif ($pl.Cpu -eq 'intel') {
             $c.RebarPlaca = $(if ($serie -le 3) { 'no' } elseif ($serie -le 5) { 'bios' } else { 'si' })
         }
@@ -3965,7 +3968,7 @@ function Leer-Bios {
             [void]$items.Add((Item-Bios 'rebar' $rbNom 'NoCompat' $l ''))
         } elseif ($rb -eq $false) {
             $l = @('El procesador ve la memoria de la placa de video de a 256 MB. Activandolo ganas unos FPS en muchos juegos.', 'Necesita Above 4G Decoding y modo UEFI.')
-            if ($cp.RebarPlaca -eq 'bios') { $l += (Texto-Bios 'Tu placa (chipset {0}) lo tiene solo con una BIOS nueva: si no ves la opcion, actualiza la BIOS desde la pagina de tu placa.' $cp.Chipset); $pl.ActualizarBios = $true }
+            if ($cp.RebarPlaca -eq 'bios') { $l += (Texto-Bios 'Tu placa (chipset {0}) lo tiene solo con una BIOS nueva: si no ves la opcion, actualiza la BIOS desde la pagina de tu placa.' $cp.Chipset); if ($pl.BiosFecha) { $l += (Texto-Bios 'Tu BIOS es de {0}: si es vieja, seguro no la tiene.' $pl.BiosFecha.ToString('MM/yyyy')) }; $pl.ActualizarBios = $true }
             elseif ($cp.RebarPlaca -eq 'quizas') { $l += (Texto-Bios 'Con tu placa (chipset {0}) depende del modelo: algunas lo agregaron con una BIOS nueva y otras nunca. Fijate en la pagina de tu placa.' $cp.Chipset); $pl.ActualizarBios = $true }
             else { $l += 'Si no ves la opcion, actualiza la BIOS: muchas placas la agregaron despues.'; $pl.ActualizarBios = $true }
             if ($pl.Firmware -eq 'Legacy') { $l += 'Primero tenes que pasar a modo UEFI.' }

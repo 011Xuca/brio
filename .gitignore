@@ -9,3 +9,4 @@ tests/
 *token*.txt
 *.pem
 *.key
+desktop.ini
