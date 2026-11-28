@@ -70,6 +70,9 @@ $ClavesAnuncios = @(
     'SubscribedContent-353696Enabled', 'SubscribedContent-353698Enabled'
 )
 
+# Menu del clic derecho de Windows 11 (opcion "cmc"): si esta clase esta en HKCU con InprocServer32 vacio, el Explorador usa el menu clasico
+$ClsidMenuNuevo = '{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}'
+
 # Apps de Xbox que siguen pudiendo correr en segundo plano aunque se bloqueen las demas (opcion "apps"):
 # app de Xbox, Game Bar, inicio de sesion de Xbox, Accesorios de Xbox, transcripcion del chat, Gaming Services,
 # Minecraft Bedrock y el Launcher de Minecraft.
@@ -2674,7 +2677,9 @@ $ListaOpciones = @(
         }
         R = {
             Opt-Ini 'Sonido de inicio (restaurar)'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' 'DisableStartupSound' 'REG_DWORD' '0'
+            # Windows 10 viene sin sonido de inicio (1) y Windows 11 con sonido (0): se deja como viene en cada uno
+            $ini = $(if (($script:Build -gt 0) -and ($script:Build -lt 22000)) { '1' } else { '0' })
+            Reg-Set 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' 'DisableStartupSound' 'REG_DWORD' $ini
             Opt-Fin 'Sonido de inicio restaurado'
         }
     },
@@ -2689,7 +2694,7 @@ $ListaOpciones = @(
             Opt-Ini 'Efectos visuales'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'TaskbarAnimations' 'REG_DWORD' '0'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'ListviewAlphaSelect' 'REG_DWORD' '0'
-            Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'IconsOnly' 'REG_DWORD' '0'
+            # Las miniaturas (IconsOnly) son de "Iconos en vez de miniaturas" (thm): esta opcion no las toca para no pisarla
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'ListviewShadow' 'REG_DWORD' '0'
             Reg-Set 'HKCU\Control Panel\Desktop\WindowMetrics' 'MinAnimate' 'REG_SZ' '0'
             Reg-Set 'HKCU\Software\Microsoft\Windows\DWM' 'AlwaysHibernateThumbnails' 'REG_DWORD' '0'
@@ -2702,7 +2707,6 @@ $ListaOpciones = @(
             Opt-Ini 'Efectos visuales (restaurar)'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'TaskbarAnimations' 'REG_DWORD' '1'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'ListviewAlphaSelect' 'REG_DWORD' '1'
-            Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'IconsOnly' 'REG_DWORD' '0'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'ListviewShadow' 'REG_DWORD' '1'
             Reg-Set 'HKCU\Control Panel\Desktop\WindowMetrics' 'MinAnimate' 'REG_SZ' '1'
             Reg-Del 'HKCU\Software\Microsoft\Windows\DWM' 'AlwaysHibernateThumbnails'
@@ -2749,6 +2753,36 @@ $ListaOpciones = @(
             Opt-Ini 'Finalizar tarea (restaurar)'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings' 'TaskbarEndTask' 'REG_DWORD' '0'
             Opt-Fin 'Finalizar tarea quitado del clic derecho'
+        }
+    },
+    @{
+        # Menu clasico: una clave vacia en HKCU tapa el menu nuevo de Windows 11 (solo para tu usuario). R borra esa clave.
+        Id = 'cmc'; Seccion = 'INTERFAZ Y COMODIDAD'
+        Q = '- Desea volver al menu del clic derecho clasico? (Windows 11: todas las opciones de una, sin "Mostrar mas opciones")'
+        Hace = 'en Windows 11, el clic derecho en el Explorador y el escritorio vuelve a mostrar el menu completo de siempre, sin tener que tocar "Mostrar mas opciones". Solo cambia tu usuario y reinicia el Explorador.'
+        Favor = 'llegas de una a las opciones de tus programas (7-Zip, WinRAR, editores) sin un clic de mas.'
+        Contra = 'se pierde el menu nuevo con los iconos de copiar, pegar y renombrar arriba. La barra de tareas parpadea un momento al aplicarlo.'
+        Saltar = {
+            if (($script:Build -gt 0) -and ($script:Build -lt 22000)) { Log 'SALTADO' ('Menu del clic derecho clasico: necesita Windows 11 - build ' + $script:Build); return $true }
+            return $false
+        }
+        S = {
+            Opt-Ini 'Menu del clic derecho clasico'
+            Reg-Set ('HKCU\Software\Classes\CLSID\' + $ClsidMenuNuevo + '\InprocServer32') '' 'REG_SZ' ''
+            if ($script:OptT -gt 0) { Act 'EXPLORER_RESTART' | Out-Null }
+            Opt-Fin 'Menu del clic derecho clasico activo'
+        }
+        R = {
+            Opt-Ini 'Menu del clic derecho clasico (restaurar)'
+            $base = 'HKCU\Software\Classes\CLSID'
+            if (-not (Reg-Existe ($base + '\' + $ClsidMenuNuevo))) { Ya-Estaba; Log 'OK' 'ya no existia la clave del menu clasico' }
+            else {
+                $k = $null
+                try { $k = Reg-Abrir $base 'borrar'; $k.DeleteSubKeyTree($ClsidMenuNuevo, $false) } catch { Log 'INFO' ('no se pudo borrar la clave del menu clasico: ' + $_.Exception.Message) } finally { if ($k) { $k.Dispose() } }
+                Res (-not (Reg-Existe ($base + '\' + $ClsidMenuNuevo))) 'clave del menu clasico borrada'
+                Act 'EXPLORER_RESTART' | Out-Null
+            }
+            Opt-Fin 'Menu del clic derecho de Windows 11 restaurado'
         }
     },
     @{
@@ -3522,17 +3556,23 @@ $ListaOpciones = @(
     @{
         Id = 'usv'; Seccion = 'SERVICIOS Y FUNCIONES QUE CASI NADIE USA'
         Q = '- Desea apagar los servicios de usuario de contactos, calendario, mensajes y sincronizacion? (Extremo: baja procesos por cada sesion; la captura de pantalla sigue andando)'
-        Hace = 'apaga los servicios que Windows levanta por cada usuario: contactos y calendario (UserDataSvc, Unistore, PimIndex), sincronizacion (OneSync), mensajes, Dispositivos conectados, impresion de usuario y Defensa web. El servicio del portapapeles (cbdhsvc) se deja prendido: Recortes y Win+Shift+S lo necesitan.'
+        Hace = 'apaga los servicios que Windows levanta por cada usuario: contactos y calendario (UserDataSvc, Unistore, PimIndex), sincronizacion (OneSync), mensajes, Dispositivos conectados e impresion de usuario. El servicio del portapapeles (cbdhsvc) se deja prendido: Recortes y Win+Shift+S lo necesitan. La Defensa web (proteccion contra phishing de SmartScreen) tampoco se toca.'
         Favor = 'menos procesos svchost por sesion y algo menos de RAM.'
-        Contra = 'las apps Correo, Calendario y Contactos no sincronizan, "Compartir cerca" deja de andar y la proteccion web de Defender no corre.'
+        Contra = 'las apps Correo, Calendario y Contactos no sincronizan y "Compartir cerca" deja de andar.'
         S = {
             Opt-Ini 'Servicios de usuario'
-            foreach ($n in 'CDPUserSvc', 'DevicesFlowUserSvc', 'PimIndexMaintenanceSvc', 'UnistoreSvc', 'UserDataSvc', 'OneSyncSvc', 'MessagingService', 'PrintWorkflowUserSvc', 'webthreatdefsvc', 'webthreatdefusersvc') {
+            # La Defensa web (webthreatdefsvc y webthreatdefusersvc) es parte de SmartScreen: Brio ya no la apaga. R la sigue devolviendo.
+            foreach ($n in 'CDPUserSvc', 'DevicesFlowUserSvc', 'PimIndexMaintenanceSvc', 'UnistoreSvc', 'UserDataSvc', 'OneSyncSvc', 'MessagingService', 'PrintWorkflowUserSvc') {
                 Svc $n 'disabled' '4'
             }
             # Hasta v1.0.13 esta opcion apagaba el portapapeles (cbdhsvc) y con eso Recortes y Win+Shift+S dejaban de andar sin avisar
             $cb = Reg-Leer 'HKLM\SYSTEM\CurrentControlSet\Services\cbdhsvc' 'Start'
             if ($cb -and ([int64]$cb.Valor -eq 4)) { Log 'INFO' 'cbdhsvc estaba apagado (version vieja): vuelve a prenderse para que ande la captura de pantalla'; Svc 'cbdhsvc' 'delayed-auto' '2' }
+            # Hasta esta version tambien apagaba la Defensa web: si quedo apagada vuelve como viene en Windows
+            foreach ($w in @(@('webthreatdefsvc', 'demand', '3'), @('webthreatdefusersvc', 'auto', '2'))) {
+                $v = Reg-Leer ('HKLM\SYSTEM\CurrentControlSet\Services\' + $w[0]) 'Start'
+                if ($v -and ([int64]$v.Valor -eq 4)) { Log 'INFO' ($w[0] + ' estaba apagado (version vieja): vuelve a como viene en Windows'); Svc $w[0] $w[1] $w[2] }
+            }
             Opt-Fin 'Servicios de usuario apagados (se aplica al reiniciar sesion)'
         }
         R = {

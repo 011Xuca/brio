@@ -363,7 +363,7 @@ $TitulosCortos = @{
     'Debloat|drs' = 'Borrar drivers viejos'; 'Debloat|wre' = 'Borrar el entorno de recuperacion'; 'Debloat|lang' = 'Borrar idiomas sin usar'
     'Debloat|acc' = 'Borrar accesibilidad y voz'; 'Debloat|dia' = 'Diagnostico en manual'; 'Debloat|svh' = 'Juntar procesos de servicios'
     'Debloat|hst' = 'Bloquear telemetria en hosts'; 'Debloat|su' = 'Frenar actualizaciones de la Store'; 'Debloat|cam' = 'Camara compartida'
-    'Debloat|edge' = 'Quitar Edge y Bing'; 'Debloat|et' = 'Finalizar tarea en la barra'
+    'Debloat|edge' = 'Quitar Edge y Bing'; 'Debloat|et' = 'Finalizar tarea en la barra'; 'Debloat|cmc' = 'Clic derecho clasico'
     'Gaming|cpu' = 'Modo Nitro'; 'Gaming|tr' = 'Temporizador del sistema'; 'Gaming|mi' = 'Desactivar integridad de memoria'
     'Gaming|fgb' = 'Mas CPU a la ventana activa'; 'Gaming|mm' = 'Prioridad para juegos'; 'Gaming|afi' = 'Afinidad de CPU'
     'Gaming|idle' = 'Nucleos siempre despiertos'; 'Gaming|fso' = 'Sin optimizacion de pantalla completa'; 'Gaming|msi' = 'Modo MSI'
@@ -747,6 +747,8 @@ $Chequeos = @{
     'Debloat|trn'   = { (Leer-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize' 'EnableTransparency') -eq 0 }
     'Debloat|cal'   = { (Leer-Reg 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' 'DisableNotificationCenter') -eq 1 }
     'Debloat|et'    = { (Leer-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings' 'TaskbarEndTask') -eq 1 }
+    # Aplicada solo si el valor (predeterminado) existe y esta vacio (asi lo deja la opcion); sin la clave sale sin aplicar
+    'Debloat|cmc'   = { $v = Leer-Reg 'HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' '(default)'; ($null -ne $v) -and ([string]$v -eq '') }
     # Sin la excepcion de Xbox (versiones viejas) sale sin aplicar, para que al aplicarla de nuevo Xbox y Minecraft vuelvan a andar de fondo
     'Debloat|apps'  = { ((Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy' 'LetAppsRunInBackground') -eq 2) -and ($null -ne (Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy' 'LetAppsRunInBackground_ForceAllowTheseApps')) }
     'Debloat|ini'   = { Inicio-Conteo }
@@ -3094,7 +3096,7 @@ $OrdenOpc = @{
         # Privacidad y telemetria: primero lo que ademas corre en segundo plano (servicios y tareas)
         'tel', 'tp', 'tpn', 'tps', 'hst', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'cdp', 'clh', 'wer',
         # Interfaz y comodidad
-        'ad', 'bng', 'wg', 'tvb', 'et', 'cal', 'sch', 'sns', 'cam',
+        'ad', 'bng', 'wg', 'tvb', 'et', 'cmc', 'cal', 'sch', 'sns', 'cam',
         # Puntos de restauracion y lo que borra partes de Windows (de mas a menos espacio liberado; el entorno de recuperacion al final)
         'rpo', 'rbs', 'drs', 'lang', 'acc', 'dold', 'dball', 'wre'
     )
@@ -3254,6 +3256,7 @@ function Calcular-NoDisp($i, $cpu) {
     # iap e iao salieron de ia (v1.0.13): mismo requisito, asi los perfiles hacen lo mismo que antes
     if ($b -lt 26100) { foreach ($x in 'ia', 'iap', 'iao') { $r['Debloat|' + $x] = ($nv + 'Windows 11 24H2 o mas nuevo. Tenes ' + $tuyo + '.') } }
     if ($b -lt 22000) { $r['Debloat|cal'] = ($nv + 'Windows 11 (en Windows 10 el calendario del reloj no se puede quitar). Tenes ' + $tuyo + '.') }
+    if ($b -lt 22000) { $r['Debloat|cmc'] = ($nv + 'Windows 11 (en Windows 10 el clic derecho ya es el menu clasico). Tenes ' + $tuyo + '.') }
     if (-not $i.BitLocker) { $r['Debloat|bl'] = 'Tu edicion de Windows no tiene BitLocker: viene en Pro, Enterprise y Education.' }
     if (-not $i.Winget) { $r['Debloat|chr'] = 'Falta winget en tu PC: instala o actualiza el "Instalador de aplicaciones" desde la Microsoft Store.' }
     if ($i.Chrome) { $r['Debloat|chr'] = 'Ya tenes Google Chrome instalado.' }
