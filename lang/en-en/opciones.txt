@@ -13,12 +13,6 @@ Hace: turns off restore points for good and deletes the ones you already have.
 Favor: frees disk space and Windows stops writing copies in the background.
 Contra: if something goes wrong you won't be able to go back with a restore point.
 
-[Debloat av]
-Titulo: Turn off the antivirus
-Hace: turns off Defender, SmartScreen and Smart App Control (aka turning off Defender).
-Favor: less CPU and disk use, and no scans in the middle of a match.
-Contra: the PC is left without virus protection and Smart App Control can't be turned back on without reinstalling Windows. If you have Riot Vanguard, it gets removed: RESTART THE PC WITHOUT FAIL before reinstalling it (or opening VALORANT or LoL), or errors and install loops can happen.
-
 [Debloat bl]
 Titulo: Disable BitLocker
 Hace: decrypts the disk and stops Windows from encrypting it again on its own.

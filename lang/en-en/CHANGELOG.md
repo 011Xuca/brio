@@ -63,6 +63,8 @@ English changelog of **Brío** (the app shows the section of your version when t
 - `tests\Verificar-Opciones.ps1`: automatic check that fails if there are repeated ids, if a translation, a status check or the place in the impact order is missing, or if a split option is not in the profiles that had the original.
 
 ### Changes
+- **"Turn off the antivirus" was removed** (also from the **Full Optimized** and **Minimum RAM** profiles): Brío no longer turns off Defender, SmartScreen or Smart App Control, so the antivirus stops flagging the app. If you turned it off with an old version, **Tools > Restore the Windows antivirus** turns it back on (you turn Tamper Protection back on yourself in Windows Security). **Lighter antivirus** stays in the Gamer zone.
+- **"Activate Windows" was removed** from Tools.
 - **Shared camera (cam)**: on recent Windows 11 each camera has its own "Allow multiple apps to use camera at the same time" switch and Brio cannot change it by itself. The option now turns on Windows' general mode and opens the Cameras page in Settings so you turn it on by hand (before, it said it turned it on and on some PCs nothing happened). The texts explain it.
 - **Warning for dual-CCD Ryzen X3D** (7900X3D, 7950X3D, 9900X3D, 9950X3D) on **High performance plan**, **Nitro mode** and **Always-awake cores**: the AMD driver needs the Balanced plan to park the non-V-Cache CCD, so leave them unchecked. It is only a warning, they are not skipped.
 - **Profiles also offer to move your OneDrive folders**: if the profile removes OneDrive (and you did not choose to keep it) and your Desktop, Documents or Pictures are inside OneDrive, the usual dialog appears before uninstalling it. If you do not confirm, OneDrive is not uninstalled.

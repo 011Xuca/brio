@@ -320,26 +320,7 @@ function Hosts-Tiene([string]$h) {
     try { return ([IO.File]::ReadAllText($h, [Text.Encoding]::Default)).Contains('# xuca-telemetria') } catch { return $false }
 }
 
-# Politicas del antivirus, SmartScreen y Smart App Control
-function Av-RegsOff {
-    $def = 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender'
-    Reg-Set $def 'DisableAntiSpyware' 'REG_DWORD' '1'
-    Reg-Set $def 'PUAProtection' 'REG_DWORD' '0'
-    foreach ($n in 'DisableRealtimeMonitoring', 'DisableBehaviorMonitoring', 'DisableOnAccessProtection', 'DisableScanOnRealtimeEnable', 'DisableIOAVProtection') { Reg-Set ($def + '\Real-Time Protection') $n 'REG_DWORD' '1' }
-    Reg-Set ($def + '\Spynet') 'SpynetReporting' 'REG_DWORD' '0'
-    Reg-Set ($def + '\Spynet') 'SubmitSamplesConsent' 'REG_DWORD' '2'
-    Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Notifications' 'DisableNotifications' 'REG_DWORD' '1'
-    Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Windows\System' 'EnableSmartScreen' 'REG_DWORD' '0'
-    Reg-Set 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' 'SmartScreenEnabled' 'REG_SZ' 'Off'
-    Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\AppHost' 'EnableWebContentEvaluation' 'REG_DWORD' '0'
-    Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Edge' 'SmartScreenEnabled' 'REG_DWORD' '0'
-    Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Edge' 'SmartScreenPuaEnabled' 'REG_DWORD' '0'
-    foreach ($n in 'ServiceEnabled', 'NotifyMalicious', 'NotifyPasswordReuse', 'NotifyUnsafeApp') { Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WTDS\Components' $n 'REG_DWORD' '0' }
-    Reg-Set 'HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy' 'VerifiedAndReputablePolicyState' 'REG_DWORD' '0'
-    Reg-Del 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' 'SecurityHealth'
-    Reg-Del 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' 'SecurityHealth'
-}
-
+# Brio ya no apaga el antivirus. Esto solo deshace lo que dejaban las versiones viejas (politicas de Defender, SmartScreen y Edge).
 function Av-RegsOn {
     $def = 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender'
     Reg-Del $def 'DisableAntiSpyware'
@@ -351,7 +332,7 @@ function Av-RegsOn {
     Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Windows\System' 'EnableSmartScreen'
     Reg-Set 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' 'SmartScreenEnabled' 'REG_SZ' 'Warn'
     Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\AppHost' 'EnableWebContentEvaluation' 'REG_DWORD' '1'
-    # Las politicas de Edge que puso Av-RegsOff (si quedan, Edge sigue sin SmartScreen y dice "administrado por tu organizacion")
+    # Las politicas de Edge que ponian las versiones viejas (si quedan, Edge sigue sin SmartScreen y dice "administrado por tu organizacion")
     Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Edge' 'SmartScreenEnabled'
     Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Edge' 'SmartScreenPuaEnabled'
     Reg-Set 'HKCU\Software\Microsoft\Edge' 'SmartScreenEnabled' 'REG_DWORD' '1'
@@ -672,7 +653,7 @@ function Navegadores-Instalados {
 # ------------------------------------------------------------
 # Las acciones (antes cada una abria su propio PowerShell desde el .bat). Devuelven un codigo:
 # 0 = hecho, 1 = fallo, 2 = no aplica, 3 = instalador lanzado, 4 = cancelado, 5 = ya estaba, 6 = queda un paso para despues.
-# $XDato: los valores para SPI (efectos visuales). $XChk: AV_OFF solo revisa si ya estaba todo apagado.
+# $XDato: los valores para SPI (efectos visuales).
 # ------------------------------------------------------------
 # Programas instalados (nombre y version), leidos directo del registro.
 # Get-ItemProperty sobre Uninstall\* se rompe entero ("La conversion especificada no es valida") si un programa dejo un valor mal guardado.
@@ -698,7 +679,7 @@ function Programas-Instalados {
     }
 }
 
-function Debloat-Act([string]$XAct, [string]$XDato, [bool]$XChk) {
+function Debloat-Act([string]$XAct, [string]$XDato) {
     $code = 0
     # Quitar-Apps y Quitar-Contrasena anotan sus errores aca (antes tocaban el codigo de todo el script)
     $global:XMal = $false
@@ -804,47 +785,6 @@ function Debloat-Act([string]$XAct, [string]$XDato, [bool]$XChk) {
             if ($LASTEXITCODE -eq 0) { Log 'OK' 'powercfg /hibernate on' } else { Log 'FALLO' 'powercfg /hibernate on'; $code = 1 }
             if ([IO.File]::Exists($env:SystemDrive + '\hiberfil.sys')) { Log 'OK' 'verificado: hiberfil.sys existe' }
             else { Log 'FALLO' 'no aparecio hiberfil.sys'; $code = 1 }
-        }
-    }
-
-    'AV_OFF' {
-        if (Test-AvOff) {
-            Log 'OK' 'ya estaba todo apagado'
-            $code = 5
-        } elseif (-not $XChk) {
-            $ops = @(
-                @{ N = 'proteccion en tiempo real'; S = { Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction Stop } },
-                @{ N = 'monitoreo de comportamiento'; S = { Set-MpPreference -DisableBehaviorMonitoring $true -ErrorAction Stop } },
-                @{ N = 'analisis de descargas'; S = { Set-MpPreference -DisableIOAVProtection $true -ErrorAction Stop } },
-                @{ N = 'analisis de scripts'; S = { Set-MpPreference -DisableScriptScanning $true -ErrorAction Stop } },
-                @{ N = 'bloqueo al primer vistazo'; S = { Set-MpPreference -DisableBlockAtFirstSeen $true -ErrorAction Stop } },
-                @{ N = 'proteccion en la nube'; S = { Set-MpPreference -MAPSReporting 0 -ErrorAction Stop } },
-                @{ N = 'envio automatico de muestras'; S = { Set-MpPreference -SubmitSamplesConsent 2 -ErrorAction Stop } },
-                @{ N = 'proteccion de red'; S = { Set-MpPreference -EnableNetworkProtection Disabled -ErrorAction Stop } },
-                @{ N = 'acceso controlado a carpetas'; S = { Set-MpPreference -EnableControlledFolderAccess Disabled -ErrorAction Stop } },
-                @{ N = 'bloqueo de apps no deseadas'; S = { Set-MpPreference -PUAProtection Disabled -ErrorAction Stop } }
-            )
-            $script:AvFallos = 0
-            foreach ($o in $ops) {
-                try { & $o.S } catch { Log 'FALLO' ($o.N + ': ' + $_.Exception.Message); $code = 1; $script:AvFallos++ }
-            }
-            Start-Sleep -Seconds 2
-            $s = Get-MpComputerStatus
-            $m = Get-MpPreference
-            $vf = @(
-                @{ N = 'proteccion en tiempo real'; V = ($s.RealTimeProtectionEnabled -eq $false) },
-                @{ N = 'monitoreo de comportamiento'; V = ($s.BehaviorMonitorEnabled -eq $false) },
-                @{ N = 'analisis de descargas'; V = ($s.IoavProtectionEnabled -eq $false) },
-                @{ N = 'proteccion de acceso'; V = ($s.OnAccessProtectionEnabled -eq $false) },
-                @{ N = 'proteccion en la nube'; V = ($m.MAPSReporting -eq 0) },
-                @{ N = 'proteccion de red'; V = ($m.EnableNetworkProtection -eq 0) },
-                @{ N = 'acceso controlado a carpetas'; V = ($m.EnableControlledFolderAccess -eq 0) },
-                @{ N = 'bloqueo de apps no deseadas'; V = ($m.PUAProtection -eq 0) }
-            )
-            foreach ($c in $vf) {
-                if ($c.V) { Log 'OK' ('verificado: ' + $c.N + ' apagada') }
-                else { Log 'FALLO' ($c.N + ' sigue encendida (probablemente por la Proteccion contra alteraciones)'); $code = 1; $script:AvFallos++ }
-            }
         }
     }
 
@@ -2387,7 +2327,7 @@ public static class SpiNative {
 }
 
 # Corre una accion y devuelve su codigo (si se rompe, queda como PS-ERROR en el log)
-function Act([string]$a, [string]$dato = '', [bool]$chk = $false) { return (Hacer { Debloat-Act $a $dato $chk } $a) }
+function Act([string]$a, [string]$dato = '') { return (Hacer { Debloat-Act $a $dato } $a) }
 
 # ------------------------------------------------------------
 # Las opciones, en el orden en que se aplican. La app arma las casillas con Id, Seccion, Q, Hace, Favor y Contra.
@@ -2572,45 +2512,11 @@ $ListaOpciones = @(
         }
     },
     @{
+        # Solo restaurar: Brio ya no apaga el antivirus. Queda para quien lo apago con una version vieja (Herramientas > Restaurar el antivirus).
         Id = 'av'; Seccion = 'SEGURIDAD'
-        Q = '- Desea apagar TODO el antivirus? (Defender, SmartScreen y Smart App Control; la PC queda sin proteccion)'
-        Hace = 'apaga Defender, SmartScreen y Smart App Control.'
-        Favor = 'menos uso de CPU y disco, y ningun analisis en medio de una partida.'
-        Contra = 'la PC queda sin proteccion contra virus y Smart App Control no se vuelve a encender sin reinstalar Windows. Si tenes Riot Vanguard, se borra: REINICIA LA PC SIN FALTA antes de volver a instalarlo (o abrir VALORANT o LoL), o pueden salir errores y bucles de instalacion.'
-        Antes = {
-            'AVISO: si tenes Riot Vanguard, se borra solo si una opcion de seguridad cambia algo de verdad (si ya la tenias asi, no se toca); se desinstala del todo, se cierra Riot y lo volves a instalar abriendo el cliente de Riot. REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.'
-            ''
-            'AVISO: Smart App Control no se puede volver a encender sin reinstalar Windows.'
-            'AVISO: la Proteccion contra alteraciones la apagas vos; el script abre la pagina.'
-            'AVISO: con R, volve a activar la Proteccion contra alteraciones en Seguridad de Windows.'
-        }
-        S = {
-            Opt-Ini 'Antivirus de Windows'
-            Say '  Revisando el estado del antivirus, un momento...'
-            if ((Act 'AV_OFF' '' $true) -ge 5) {
-                Av-RegsOff
-                $script:OptS++
-                Opt-Fin 'Antivirus, SmartScreen y Smart App Control desactivados'
-                return
-            }
-            Say ''
-            Say '  Apaga ahora la Proteccion contra alteraciones: se abre la pagina de Seguridad de Windows.'
-            Say '  Cuando la apagues, volve aca.'
-            Av-RegsOff
-            $script:AvFallos = 0
-            Resps (Act 'AV_OFF')
-            # Cada ajuste que no se pudo apagar cuenta como un fallo (antes 3 lineas FALLO se informaban como 1)
-            if ($script:AvFallos -gt 1) { $script:OptF += ($script:AvFallos - 1); $script:OptT += ($script:AvFallos - 1) }
-            Opt-Fin $(if ($script:OptF -gt 0) { 'Antivirus: NO se pudo apagar, sigue encendido' } else { 'Antivirus, SmartScreen y Smart App Control desactivados' })
-            if ($script:OptF -gt 0) {
-                Say '  EL ANTIVIRUS SIGUE ENCENDIDO: casi seguro la Proteccion contra alteraciones esta encendida. Apagala en Seguridad de Windows y repeti.' 'Red'
-                Log 'ATENCION' 'el antivirus sigue encendido (no esta desactivado): apagar la Proteccion contra alteraciones en Seguridad de Windows y volver a aplicar'
-                if ($env:XR_XRES -eq '1') { Say 'XRES|aviso|El antivirus SIGUE ENCENDIDO: Windows no dejo apagarlo, casi seguro porque la Proteccion contra alteraciones esta encendida. Apagala en Seguridad de Windows > Proteccion antivirus y contra amenazas > Configuracion de antivirus y proteccion contra amenazas > Proteccion contra alteraciones, y volve a aplicar.' }
-            } else {
-                # Solo si el antivirus de verdad se apago se avisa lo de reiniciar antes de jugar Valorant y se toca Vanguard
-                Vanguard-Check
-            }
-        }
+        Q = '- Desea restaurar el antivirus? (Defender y SmartScreen, si los apago una version vieja de Brio)'
+        Hace = 'vuelve a encender Defender y SmartScreen como vienen en Windows.'
+        Saltar = { (Respuesta 'av') -ne 'R' }
         R = {
             Opt-Ini 'Antivirus de Windows (restaurar)'
             Av-RegsOn
