@@ -518,9 +518,7 @@ function Correr-Limpieza([string]$salida, [string]$carpeta) {
         # ---------------------------------------------------------------
         # COMPONENTES VIEJOS DE WINDOWS
         # ---------------------------------------------------------------
-        # /StartComponentCleanup existe desde Windows 8
-        if (($env:CLEAN_DISM -eq '1') -and ([Environment]::OSVersion.Version -lt [version]'6.2')) { Say 'Componentes viejos de Windows (DISM): tu Windows no tiene esta limpieza, se salteo.' 'Yellow' }
-        elseif ($env:CLEAN_DISM -eq '1') {
+        if ($env:CLEAN_DISM -eq '1') {
             Say "Limpiando componentes viejos de Windows (DISM), puede tardar varios minutos..." 'Cyan'
             # Con la ruta completa: en algunas PCs System32 no esta en el PATH
             Start-Process -FilePath (Join-Path $env:SystemRoot 'System32\Dism.exe') -ArgumentList '/Online', '/Cleanup-Image', '/StartComponentCleanup' -Wait -WindowStyle Hidden

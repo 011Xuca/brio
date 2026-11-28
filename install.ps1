@@ -6,10 +6,10 @@ $Destino = Join-Path $env:LOCALAPPDATA 'Brio'
 $Nombre  = 'Br' + [string][char]0xED + 'o'
 
 if ($PSVersionTable.PSVersion.Major -lt 5) {
-    Write-Host ($Nombre + ' necesita PowerShell 5.1. En Windows 7 SP1 instala WMF 5.1 (https://aka.ms/wmf51download) y volve a probar.') -ForegroundColor Red
+    Write-Host ($Nombre + ' necesita Windows 10 u 11 (con PowerShell 5.1).') -ForegroundColor Red
     return
 }
-# 3072 = TLS 1.2 (GitHub no acepta menos; Windows 7 no lo usa solo)
+# 3072 = TLS 1.2 (GitHub no acepta menos; el PowerShell 5.1 de algunos Windows 10 no lo usa solo)
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]3072
 $tmp = Join-Path $env:TEMP ('brio_' + [guid]::NewGuid().ToString('N'))
 

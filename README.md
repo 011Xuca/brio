@@ -21,14 +21,6 @@ It installs to `%LOCALAPPDATA%\Brio` and puts a **Brío** shortcut on your deskt
 
 You can also download the repo as a ZIP and open `Brio.bat`.
 
-**Windows 7 SP1 and 8.1:** first install [WMF 5.1](https://aka.ms/wmf51download) (it brings PowerShell 5.1) and use this command, which enables TLS 1.2 so it can download from GitHub:
-
-```powershell
-[Net.ServicePointManager]::SecurityProtocol = 3072; irm https://raw.githubusercontent.com/011Xuca/brio/main/install.ps1 | iex
-```
-
-There, options that need Windows 10 or 11 show up greyed out and aren't applied.
-
 ## How to use it
 
 1. When you open the app you see the **welcome** screen with a summary of everything. Pick a section in the left bar (if you don't know where to start, go to **Profiles**).
@@ -63,7 +55,7 @@ There, options that need Windows 10 or 11 show up greyed out and aren't applied.
 - **Options with ⚠ (yellow border) can cause problems on some PCs.** Hover over one and it tells you why.
 - **Xbox, Game Pass and Minecraft:** anything that touches Xbox or the Game Bar is flagged on its card, "Tick only safe ones" doesn't tick it, and the app asks before applying it (with **No Xbox** everything else is applied without it). Gaming Services is only removed by **Remove Xbox completely**, which isn't in any profile. The Safe, Optimized and RAM profiles don't touch Xbox; the Competitive ones only remove the Game Bar (asking first).
 - Almost everything can be undone: tick it and click **Reset selected**. If an option can't be undone, it tells you.
-- The **Fully Optimized** profiles turn off the antivirus: the app warns you before applying them.
+- Brío never turns off the antivirus. If an old version turned it off, **Tools > Restore the Windows antivirus** turns it back on.
 
 ## More
 
@@ -100,14 +92,6 @@ Se instala en `%LOCALAPPDATA%\Brio` y te deja el acceso directo **Brío** en el 
 
 También podés bajar el repo como ZIP y abrir `Brio.bat`.
 
-**Windows 7 SP1 y 8.1:** primero instalá [WMF 5.1](https://aka.ms/wmf51download) (trae PowerShell 5.1) y usá este comando, que activa TLS 1.2 para poder bajar de GitHub:
-
-```powershell
-[Net.ServicePointManager]::SecurityProtocol = 3072; irm https://raw.githubusercontent.com/011Xuca/brio/main/install.ps1 | iex
-```
-
-Ahí las opciones que necesitan Windows 10 u 11 aparecen en gris y no se aplican.
-
 ### Cómo se usa
 
 1. Al abrir la app ves la **bienvenida**, con un resumen de todo. Elegí una sección en la barra de la izquierda (si no sabés por dónde empezar, andá a **Perfiles**).
@@ -142,7 +126,7 @@ Ahí las opciones que necesitan Windows 10 u 11 aparecen en gris y no se aplican
 - **Las opciones con ⚠ (borde amarillo) pueden dar problemas en algunas PCs.** Si pasás el mouse por encima, te dice por qué.
 - **Xbox, Game Pass y Minecraft:** lo que toca Xbox o la Game Bar avisa en su tarjeta, no lo marca "Marcar solo seguras" y, antes de aplicarlo, la app te pregunta (con **Sin Xbox** se aplica todo lo demás sin eso). Gaming Services solo lo borra **Quitar Xbox completo**, que no está en ningún perfil. Los perfiles Seguro, Optimizado y RAM no tocan Xbox; los Competitivo solo borran la Game Bar (preguntando antes).
 - Casi todo se puede deshacer: marcalo y tocá **Restablecer seleccionadas**. Si una opción no se puede deshacer, te lo avisa.
-- Los perfiles **Full Optimizado** apagan el antivirus: la app te lo avisa antes de aplicarlos.
+- Brío nunca apaga el antivirus. Si una versión vieja lo apagó, **Herramientas > Restaurar el antivirus de Windows** lo vuelve a encender.
 
 ### Más cosas
 

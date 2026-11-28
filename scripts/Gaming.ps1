@@ -8,12 +8,7 @@
 # ============================================================
 
 # Opciones que necesitan reiniciar para aplicarse. Solo se pide reiniciar si alguna de estas cambio algo de verdad.
-$ReinGaming = @('tk', 'mm', 'notif', 'gf', 'mpo', 'msi', 'pca', 'tr', 'mi', 'vbs', 'md', 'v4', 'll', 'nag', 'nic', 'dup', 'spc', 'xbt', 'fsm')
-
-# Opciones que usan comandos que Windows 7 y 8 no tienen (tareas programadas nuevas, apps de la Store, DNS por placa,
-# Defender nuevo, dispositivos). En esas versiones la app las muestra como no compatibles y aca se saltean.
-# wgo (juegos en ventana) solo existe en Windows 11.
-$SoloWin10 = @('afi', 'xb', 'xbt', 'fso', 'msi', 'tr', 'ram', 'dns', 'mi', 'avl', 'vbs', 'wgo')
+$ReinGaming = @('tk', 'pj', 'notif', 'gf', 'mpo', 'msi', 'pca', 'tr', 'mi', 'vbs', 'md', 'll', 'nag', 'nic', 'dup', 'spc', 'xbt', 'fsm')
 $GameBarProtocolos = @('ms-gamingoverlay', 'ms-gamebar', 'ms-gamebarservices')
 
 # "Quitar Xbox completo" (xbt): servicios, apps (instaladas y provisionadas) y la tarea de guardado en la nube.
@@ -2331,20 +2326,7 @@ public static class SpiNative {
         if (Test-AvOff) { $code = 10 } else { $code = 0 }
     }
 
-    'AV_LIGHT' {
-        $m = Get-MpPreference
-        if ($m.ScanAvgCPULoadFactor -eq 5 -and $m.EnableLowCpuPriority -eq $true) {
-            Log 'OK' 'ya estaba: analisis con tope de CPU de 5 por ciento y prioridad baja'
-            $code = 5
-        } else {
-            try { Set-MpPreference -ScanAvgCPULoadFactor 5 -EnableLowCpuPriority $true -ErrorAction Stop }
-            catch { Log 'FALLO' ('Set-MpPreference: ' + $_.Exception.Message); $code = 1 }
-            $m = Get-MpPreference
-            if ($m.ScanAvgCPULoadFactor -eq 5 -and $m.EnableLowCpuPriority -eq $true) { Log 'OK' 'verificado: analisis con tope de CPU de 5 por ciento y prioridad baja' }
-            else { Log 'FALLO' 'no se pudo verificar el limite de CPU del antivirus'; $code = 1 }
-        }
-    }
-
+    # Solo restaura: Brio ya no limita los analisis (lo hacia "avl" en versiones viejas)
     'AV_LIGHT_R' {
         $m = Get-MpPreference
         if ($m.ScanAvgCPULoadFactor -eq 50 -and $m.EnableLowCpuPriority -eq $false) {
@@ -2723,27 +2705,44 @@ $ListaOpciones = @(
         }
     },
     @{
-        Id = 'fgb'; Seccion = 'CPU Y PRIORIDAD'
-        Q = '- Desea darle mas turno de procesador al programa que estas usando? (Prioridad en primer plano; efecto chico)'
-        Hace = 'cambia como Windows reparte el tiempo del procesador (Win32PrioritySeparation = 38): la ventana en la que estas, por ejemplo el juego, recibe turnos mas largos y pasa antes que los programas de fondo.'
-        Favor = 'el juego responde mas parejo cuando hay programas abiertos de fondo.'
-        Contra = 'los programas en segundo plano (descargas, navegador) van un poco mas lentos mientras jugas.'
+        # v1.0.13: junta "Mas CPU a la ventana activa" (fgb) y "Prioridad para juegos" (mm), las dos de efecto chico
+        Id = 'pj'; Seccion = 'CPU Y PRIORIDAD'
+        Q = '- Desea darle prioridad al juego? (Mas turno de procesador para la ventana activa y prioridad multimedia MMCSS; efecto chico)'
+        Hace = 'le da al juego un poco mas de procesador de dos formas: la ventana en la que estas recibe turnos mas largos y pasa antes que los programas de fondo (Win32PrioritySeparation = 38), y el programador multimedia de Windows (MMCSS) le da mas CPU y prioridad a los juegos. El limite de red queda en 10, el valor de Windows, porque sacarlo puede empeorar la latencia.'
+        Favor = 'el juego puede responder un poco mas parejo cuando hay programas abiertos de fondo.'
+        Contra = 'el efecto es chico: en muchas PCs no se nota. Los programas en segundo plano (descargas, navegador) van un poco mas lentos mientras jugas.'
         S = {
-            Opt-Ini 'Prioridad en primer plano'
+            Opt-Ini 'Prioridad para juegos'
+            $g = 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games'
+            $sp = 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile'
             Reg-Set 'HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl' 'Win32PrioritySeparation' 'REG_DWORD' '38'
-            Opt-Fin 'Prioridad en primer plano aplicada'
+            Reg-Set $g 'GPU Priority' 'REG_DWORD' '8'
+            Reg-Set $g 'Priority' 'REG_DWORD' '6'
+            Reg-Set $g 'Scheduling Category' 'REG_SZ' 'High'
+            Reg-Set $g 'SFIO Priority' 'REG_SZ' 'High'
+            Reg-Set $sp 'NetworkThrottlingIndex' 'REG_DWORD' '10'
+            Reg-Set $sp 'SystemResponsiveness' 'REG_DWORD' '10'
+            Opt-Fin 'Prioridad para juegos aplicada'
         }
         R = {
-            Opt-Ini 'Prioridad en primer plano (restaurar)'
+            Opt-Ini 'Prioridad para juegos (restaurar)'
+            $g = 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games'
+            $sp = 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile'
             Reg-Set 'HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl' 'Win32PrioritySeparation' 'REG_DWORD' '2'
-            Opt-Fin 'Prioridad en primer plano como la deja Windows'
+            Reg-Set $g 'GPU Priority' 'REG_DWORD' '8'
+            Reg-Set $g 'Priority' 'REG_DWORD' '2'
+            Reg-Set $g 'Scheduling Category' 'REG_SZ' 'Medium'
+            Reg-Set $g 'SFIO Priority' 'REG_SZ' 'Normal'
+            Reg-Set $sp 'NetworkThrottlingIndex' 'REG_DWORD' '10'
+            Reg-Set $sp 'SystemResponsiveness' 'REG_DWORD' '20'
+            Opt-Fin 'Prioridad para juegos restaurada a los valores de Windows'
         }
     },
     @{
         Id = 'dvr'; Seccion = 'MODO JUEGO Y GAME BAR'
         Q = '- Desea apagar la grabacion de juegos en segundo plano? (Game DVR: libera CPU, GPU y disco mientras jugas)'
         Hace = 'apaga la captura y grabacion de clips de Xbox Game Bar (Game DVR), que graba en segundo plano mientras jugas. No borra la Game Bar ni toca Xbox.'
-        Favor = 'mas FPS y menos tirones, sobre todo si la grabacion en segundo plano estaba activa.'
+        Favor = 'si la grabacion en segundo plano estaba activa, deja de usar CPU, GPU y disco mientras jugas (menos tirones); si estaba apagada, casi no cambia.'
         Contra = 'no podes grabar clips con Win+Alt+G ni con la Game Bar.'
         S = {
             Opt-Ini 'Grabacion de juegos (Game DVR)'
@@ -2758,37 +2757,6 @@ $ListaOpciones = @(
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\GameDVR' 'AppCaptureEnabled' 'REG_DWORD' '1'
             Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR' 'AllowGameDVR'
             Opt-Fin 'Grabacion de juegos restaurada'
-        }
-    },
-    @{
-        Id = 'mm'; Seccion = 'CPU Y PRIORIDAD'
-        Q = '- Desea que el juego tenga prioridad sobre otros programas? (Programador multimedia MMCSS; efecto chico)'
-        Hace = 'le pide al programador multimedia de Windows (MMCSS) que le de mas CPU y prioridad a los juegos. El limite de red queda en 10, el valor de Windows, porque sacarlo puede empeorar la latencia.'
-        Favor = 'un poco mas de CPU para el juego y menos tirones.'
-        Contra = 'el efecto es chico.'
-        S = {
-            Opt-Ini 'Prioridad multimedia (MMCSS)'
-            $g = 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games'
-            $sp = 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile'
-            Reg-Set $g 'GPU Priority' 'REG_DWORD' '8'
-            Reg-Set $g 'Priority' 'REG_DWORD' '6'
-            Reg-Set $g 'Scheduling Category' 'REG_SZ' 'High'
-            Reg-Set $g 'SFIO Priority' 'REG_SZ' 'High'
-            Reg-Set $sp 'NetworkThrottlingIndex' 'REG_DWORD' '10'
-            Reg-Set $sp 'SystemResponsiveness' 'REG_DWORD' '10'
-            Opt-Fin 'Prioridad multimedia para juegos aplicada'
-        }
-        R = {
-            Opt-Ini 'Prioridad multimedia (restaurar)'
-            $g = 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games'
-            $sp = 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile'
-            Reg-Set $g 'GPU Priority' 'REG_DWORD' '8'
-            Reg-Set $g 'Priority' 'REG_DWORD' '2'
-            Reg-Set $g 'Scheduling Category' 'REG_SZ' 'Medium'
-            Reg-Set $g 'SFIO Priority' 'REG_SZ' 'Normal'
-            Reg-Set $sp 'NetworkThrottlingIndex' 'REG_DWORD' '10'
-            Reg-Set $sp 'SystemResponsiveness' 'REG_DWORD' '20'
-            Opt-Fin 'Prioridad multimedia restaurada a los valores de Windows'
         }
     },
     @{
@@ -2990,20 +2958,21 @@ $ListaOpciones = @(
     },
     @{
         Id = 'notif'; Seccion = 'MODO JUEGO Y GAME BAR'
-        Q = '- Desea desactivar las notificaciones de Windows? (Apaga los avisos emergentes y el Centro de notificaciones)'
-        Hace = 'apaga los avisos emergentes y el Centro de notificaciones.'
+        # v1.0.13: solo los avisos. El Centro de notificaciones (DisableNotificationCenter) es de "cal" en Debloat: antes las dos lo tocaban y el restablecer de una deshacia a la otra.
+        Q = '- Desea desactivar las notificaciones de Windows? (Apaga los avisos emergentes de Windows y de las apps)'
+        Hace = 'apaga los avisos emergentes de Windows y de las apps. No toca el Centro de notificaciones ni el calendario del reloj: eso lo hace "Quitar el calendario del reloj" en Debloat.'
         Favor = 'nada te tapa la pantalla en partida.'
         Contra = 'no ves avisos de apps como Discord o el correo, ni las invitaciones de Xbox a partidas o grupos. No sirve si una app se pone al frente por su cuenta (una actualizacion o un cuadro de Discord, Brave o Spotify): eso no es un aviso y puede seguir pasando.'
         S = {
             Opt-Ini 'Notificaciones de Windows'
-            Reg-Set 'HKCU\Software\Policies\Microsoft\Windows\Explorer' 'DisableNotificationCenter' 'REG_DWORD' '1'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\PushNotifications' 'ToastEnabled' 'REG_DWORD' '0'
             Opt-Fin 'Notificaciones desactivadas (se aplica al reiniciar el Explorador o la PC)'
         }
         R = {
             Opt-Ini 'Notificaciones de Windows (restaurar)'
-            Reg-Del 'HKCU\Software\Policies\Microsoft\Windows\Explorer' 'DisableNotificationCenter'
             Reg-Del 'HKCU\Software\Microsoft\Windows\CurrentVersion\PushNotifications' 'ToastEnabled'
+            # Hasta v1.0.13 esta opcion tambien apagaba el Centro de notificaciones. En Windows 11 lo devuelve "cal"; en Windows 10 "cal" no existe, asi que se devuelve aca
+            if (($script:Build -gt 0) -and ($script:Build -lt 22000)) { Reg-Del 'HKCU\Software\Policies\Microsoft\Windows\Explorer' 'DisableNotificationCenter' }
             Opt-Fin 'Notificaciones restauradas (se aplica al reiniciar el Explorador o la PC)'
         }
     },
@@ -3458,25 +3427,19 @@ $ListaOpciones = @(
         }
     },
     @{
+        # Solo restaurar: Brio ya no limita los analisis del antivirus. Queda para quien lo aplico con una version vieja
+        # (Herramientas > Restaurar el antivirus de Windows lo corre despues de encender Defender).
         Id = 'avl'; Seccion = 'SEGURIDAD (MAS RENDIMIENTO)'
-        Q = '- Desea que el antivirus use menos CPU? (Limita los analisis y sigue encendido)'
-        Hace = 'limita los analisis de Defender al 5 por ciento de CPU, con prioridad baja.'
-        Favor = 'los analisis no te bajan FPS.'
-        Contra = 'los analisis tardan mas en terminar.'
+        Q = '- Desea devolver el limite de CPU de los analisis del antivirus? (Si lo bajo una version vieja de Brio)'
+        Hace = 'devuelve los analisis de Defender al limite de CPU y la prioridad que trae Windows.'
         Saltar = {
-            # Si no marcaste "Antivirus liviano" no se revisa el antivirus
-            if ((Respuesta 'avl') -eq 'N') { return $true }
+            if ((Respuesta 'avl') -ne 'R') { return $true }
             if ((Act 'AV_STATUS') -ge 10) {
-                Log 'OMITIDO' 'Antivirus liviano: el antivirus esta desactivado'
-                Say '  Antivirus liviano se omite: el antivirus ya esta apagado.'
+                Log 'OMITIDO' 'Limite de CPU del antivirus: el antivirus esta desactivado'
+                Say '  Limite de CPU del antivirus se omite: el antivirus esta apagado.'
                 return $true
             }
             return $false
-        }
-        S = {
-            Opt-Ini 'Antivirus liviano'
-            Resps (Act 'AV_LIGHT')
-            Opt-Fin 'Antivirus con menor impacto en la CPU'
         }
         R = {
             Opt-Ini 'Antivirus liviano (restaurar)'
@@ -3486,9 +3449,9 @@ $ListaOpciones = @(
     },
     @{
         Id = 'vbs'; Seccion = 'SEGURIDAD (MAS RENDIMIENTO)'
-        Q = '- Desea desactivar VBS? (5 a 10 por ciento mas en juegos; rompe Docker, WSL y Hyper-V)'
+        Q = '- Desea desactivar VBS? (Hasta 5 a 10 por ciento mas en algunos juegos; rompe Docker, WSL y Hyper-V)'
         Hace = 'apaga la seguridad basada en virtualizacion.'
-        Favor = 'entre 5 y 10 por ciento mas de FPS.'
+        Favor = 'en algunos juegos, sobre todo con procesadores viejos, hasta 5 a 10 por ciento mas de FPS; en otros casi no cambia.'
         Contra = 'deja de andar WSL, Docker, Hyper-V y las maquinas virtuales. Si tenes Riot Vanguard, se borra: REINICIA LA PC SIN FALTA antes de volver a instalarlo (o abrir VALORANT o LoL), o pueden salir errores y bucles de instalacion.'
         S = {
             Opt-Ini 'VBS'
@@ -3740,27 +3703,10 @@ $ListaOpciones = @(
             Reg-Set 'HKCU\Control Panel\Desktop' 'MenuShowDelay' 'REG_SZ' '400'
             Opt-Fin 'Retraso de menus restaurado'
         }
-    },
-    @{
-        Id = 'v4'; Seccion = 'ENERGIA Y RED'
-        Q = '- Desea preferir IPv4 sobre IPv6? (Puede bajar la latencia en juegos; IPv6 sigue funcionando; pide reiniciar)'
-        Hace = 'Windows usa IPv4 antes que IPv6 cuando hay las dos.'
-        Favor = 'puede bajar la latencia con algunos servidores.'
-        Contra = 'casi ninguno; IPv6 sigue funcionando.'
-        S = {
-            Opt-Ini 'IPv4 preferido'
-            Reg-Set 'HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters' 'DisabledComponents' 'REG_DWORD' '32'
-            Opt-Fin 'IPv4 preferido (se aplica al reiniciar)'
-        }
-        R = {
-            Opt-Ini 'IPv4 preferido (restaurar)'
-            Reg-Del 'HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters' 'DisabledComponents'
-            Opt-Fin 'IPv4 restaurado (se aplica al reiniciar)'
-        }
     }
 )
 
 # Lo que llama la app (en otro hilo, con Comun.ps1 cargado). $salida = archivo donde la app lee el progreso.
 function Correr-Gaming([string]$salida, [string]$carpeta) {
-    Correr-Opciones -Nombre 'gaming' -Titulo 'OPTIMIZACION PARA GAMING' -Lista $ListaOpciones -Rein $ReinGaming -Win10 $SoloWin10 -Salida $salida -Carpeta $carpeta
+    Correr-Opciones -Nombre 'gaming' -Titulo 'OPTIMIZACION PARA GAMING' -Lista $ListaOpciones -Rein $ReinGaming -Salida $salida -Carpeta $carpeta
 }

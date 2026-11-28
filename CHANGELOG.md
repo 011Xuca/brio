@@ -2,6 +2,31 @@
 
 Todo lo que cambió en cada versión de **Brío**. La más nueva va arriba.
 
+## v1.0.14
+
+### Nuevo
+- **Debloat, Interfaz y comodidad: Clic derecho clásico** (nueva, solo Windows 11, no está en ningún perfil): el clic derecho del Explorador y del escritorio vuelve a mostrar el menú completo, sin "Mostrar más opciones". Cambia solo tu usuario (una clave en `HKCU\Software\Classes\CLSID`) y reinicia el Explorador; Restablecer borra esa clave. En Windows 10 sale en gris.
+
+### Cambios
+- **Brío ahora requiere Windows 10 o 11**; se sacó todo lo de Windows 7 y 8.1 (código, textos, README e instrucciones de instalación).
+- **Textos sin promesas de más**: **Apagar la grabación de juegos** ya no promete "más FPS" (solo ayuda si la grabación en segundo plano estaba prendida), **Desactivar VBS** dice "hasta 5 a 10 % en algunos juegos" en vez de prometerlo siempre, y **Antivirus con menos CPU** ya no dice que los análisis no bajan FPS.
+- **Se quitó "Apagar el antivirus"** (y de los perfiles **Full Optimizado** y **RAM mínima**): Brío ya no apaga Defender, SmartScreen ni Smart App Control, así el antivirus deja de marcar la app. Si lo apagaste con una versión vieja, **Herramientas > Restaurar el antivirus de Windows** lo vuelve a encender (la Protección contra alteraciones la prendés vos en Seguridad de Windows). **Antivirus con menos CPU** sigue en Zona gamer.
+- **Se quitó "Activar Windows"** de Herramientas.
+- **Menos opciones que se pisaban o ya no servían** (Debloat pasa de 80 a 75 opciones y Zona gamer de 51 a 48):
+  - **Se quitaron "Apagar Wifi Sense", "Apagar el DRM en línea de Windows Media"** (Wifi Sense y el Grupo Hogar ya no existen en Windows 10 y 11) **y "Preferir IPv4 sobre IPv6"** (efecto casi nulo), también de los perfiles. Lo que dejaron es inofensivo y no hace falta restablecerlo.
+  - **"Bloquear telemetría en hosts" ya no existe**: Brío no toca más el archivo hosts (Defender lo marcaba) y sale de **Full Optimizado**. Si la aplicaste con una versión vieja, **Herramientas > Quitar el bloqueo de telemetría de una versión vieja** (aparece solo en ese caso) saca únicamente las líneas que agregó Brío y deja el resto del archivo como estaba; **Actualizar Windows** también las saca antes de actualizar.
+  - **"Antivirus con menos CPU" ya no existe** (cambiaba la configuración de Defender). Si la aplicaste, **Herramientas > Restaurar el antivirus de Windows** ahora también devuelve el límite de CPU de los análisis a como viene en Windows.
+  - **"Apagar extras de NVIDIA" y "Telemetría de NVIDIA" son una sola: "Apagar extras y telemetría de NVIDIA"**, con todo lo que hacían las dos y su restablecer. Si tenías aplicada una sola, sale **Desactualizada** hasta que la apliques de nuevo. **RAM mínima** usa la nueva; Seguro, Optimizado, RAM liviana, Debloat - Notebook y Full Optimizado, que solo tenían la telemetría, ya no la incluyen, para no apagar el overlay, ShadowPlay ni los filtros de la NVIDIA App.
+  - **"Más CPU a la ventana activa" y "Prioridad para juegos" son una sola: "Prioridad para juegos (efecto chico)"**, con las dos partes y su restablecer; con una sola parte aplicada sale **Desactualizada**. Competitivo, Competitivo - Notebook y Full Optimizado usan la nueva.
+  - **"Diagnóstico en manual" pasa a Servicios del Sistema** como Extremo ("Diagnóstico de Windows"). **RAM liviana** y **RAM mínima** lo siguen apagando (ahora deshabilitado en vez de Manual), y **Restablecer** de Servicios del Sistema devuelve a Automático el que dejó en Manual la opción vieja.
+  - **"Quitar funciones viejas" ahora es "Apagar servicios poco usados"** y solo apaga servicios (Fax, Mapas, modo demo, ubicación y reportes de error). Internet Explorer, Fax y Escáner y el Media Player viejo los quitan **Quitar componentes viejos** (con restablecer) y **Borrar apps antiguas**. Restablecerla sigue devolviendo esas funciones si las apagó una versión vieja y no las quitó otra opción.
+  - **"Desactivar las notificaciones de Windows" ya no apaga el Centro de notificaciones**: eso queda en **Quitar el calendario del reloj**, así restablecer una ya no deshace la otra. En Windows 10, donde no está la del calendario, restablecer las notificaciones también devuelve el Centro de notificaciones que apagaba la versión vieja.
+
+### Arreglado
+- **Reducir los efectos visuales pisaba "Iconos en vez de miniaturas"**: al aplicarla o restablecerla volvía a prender las miniaturas del Explorador. Ya no toca las miniaturas.
+- **Restablecer "Quitar el sonido de inicio de Windows" en Windows 10 prendía un sonido que Windows 10 no trae**: ahora deja cada versión como viene (Windows 10 sin sonido de inicio, Windows 11 con sonido).
+- **Apagar servicios de usuario apagaba la Defensa web** (la protección contra phishing de SmartScreen), aunque Brío ya no apaga SmartScreen. Ya no la toca y, si una versión vieja la dejó apagada, la vuelve a como viene en Windows.
+
 ## v1.0.13
 
 ### Nuevo

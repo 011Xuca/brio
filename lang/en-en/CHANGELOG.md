@@ -2,6 +2,31 @@
 
 English changelog of **Brío** (the app shows the section of your version when the language is English).
 
+## v1.0.14
+
+### New
+- **Debloat, Interface and comfort: Classic right-click menu** (new, Windows 11 only, not in any profile): right-clicking in File Explorer and on the desktop shows the full menu again, without "Show more options". It only changes your user (a key in `HKCU\Software\Classes\CLSID`) and restarts File Explorer; Restore deletes that key. On Windows 10 it is greyed out.
+
+### Changes
+- **Brío now requires Windows 10 or 11**; everything about Windows 7 and 8.1 was removed (code, texts, README and install instructions).
+- **Texts without overpromising**: **Turn off background game recording** no longer promises "more FPS" (it only helps if background recording was on), **Disable VBS** says "up to 5 to 10 % in some games" instead of promising it always, and **Lighter antivirus** no longer says scans don't lower FPS.
+- **"Turn off the antivirus" was removed** (also from the **Full Optimized** and **Minimum RAM** profiles): Brío no longer turns off Defender, SmartScreen or Smart App Control, so the antivirus stops flagging the app. If you turned it off with an old version, **Tools > Restore the Windows antivirus** turns it back on (you turn Tamper Protection back on yourself in Windows Security). **Lighter antivirus** stays in the Gamer zone.
+- **"Activate Windows" was removed** from Tools.
+- **Fewer options that overlapped or no longer did anything** (Debloat goes from 80 to 75 options and the Gamer zone from 51 to 48):
+  - **"Turn off Wifi Sense", "Turn off Windows Media online DRM"** (Wifi Sense and HomeGroup no longer exist in Windows 10 and 11) **and "Prefer IPv4 over IPv6"** (almost no effect) **were removed**, also from the profiles. What they left behind is harmless and doesn't need to be restored.
+  - **"Block telemetry in hosts" no longer exists**: Brío no longer touches the hosts file (Defender flagged it) and it leaves **Full Optimized**. If you applied it with an old version, **Tools > Remove the telemetry block from an old version** (only shown in that case) removes only the lines Brío added and leaves the rest of the file as it was; **Update Windows** also removes them before updating.
+  - **"Lighter antivirus" no longer exists** (it changed Defender's settings). If you applied it, **Tools > Restore the Windows antivirus** now also puts the scan CPU limit back the way Windows ships it.
+  - **"Turn off NVIDIA extras" and "Turn off NVIDIA telemetry" are now one option: "Turn off NVIDIA extras and telemetry"**, with everything both did and their restore. If you had only one applied, it shows as **Outdated** until you apply it again. **Minimum RAM** uses the new one; Safe, Optimized, Light RAM, Debloat - Laptop and Full Optimized, which only had the telemetry part, no longer include it, so they don't turn off the overlay, ShadowPlay or the NVIDIA App filters.
+  - **"More CPU for the active window" and "Game priority" are now one option: "Game priority (small effect)"**, with both parts and their restore; with only one part applied it shows as **Outdated**. Competitive, Competitive - Laptop and Full Optimized use the new one.
+  - **"Diagnostics on manual" moves to System services** as an Extreme one ("Windows diagnostics"). **Light RAM** and **Minimum RAM** still turn it off (now disabled instead of Manual), and **Restore** in System services puts back to Automatic the one the old option left on Manual.
+  - **"Remove old features" is now "Turn off rarely used services"** and only turns off services (Fax, Maps, demo mode, location and error reports). Internet Explorer, Fax and Scan and the old Media Player are removed by **Remove legacy components** (with restore) and **Remove legacy apps**. Restoring it still brings those features back if an old version turned them off and no other option removed them.
+  - **"Disable Windows notifications" no longer turns off the Notification Center**: that stays in **Remove the calendar from the clock**, so restoring one no longer undoes the other. On Windows 10, where the calendar option isn't available, restoring notifications also brings back the Notification Center the old version turned off.
+
+### Fixed
+- **Reduce visual effects overrode "Icons instead of thumbnails"**: applying or restoring it turned File Explorer thumbnails back on. It no longer touches thumbnails.
+- **Restoring "Remove the Windows startup sound" on Windows 10 turned on a sound Windows 10 doesn't ship with**: it now leaves each version as it comes (Windows 10 without startup sound, Windows 11 with it).
+- **Turn off per-user services turned off Web Threat Defense** (SmartScreen's phishing protection), even though Brío no longer turns off SmartScreen. It no longer touches it and, if an old version left it off, it puts it back the way Windows ships it.
+
 ## v1.0.13
 
 ### New

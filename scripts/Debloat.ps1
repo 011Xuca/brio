@@ -10,13 +10,8 @@
 # ============================================================
 
 # Opciones que necesitan reiniciar para aplicarse. Solo se pide reiniciar si alguna de estas cambio algo de verdad.
-# Las opciones que salieron de dividir una que pedia reiniciar (ad -> bng, pv -> pvu...pvl) lo siguen pidiendo igual.
-$ReinDebloat = @('av', 'rc', 'ad', 'bng', 'sv', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'ms_acc', 'al', 'cta')
-
-# Opciones que usan comandos que Windows 7 y 8 no tienen (apps de la Store, Defender nuevo, BitLocker, componentes,
-# dispositivos, cuentas locales, montar el ISO). En esas versiones la app las muestra como no compatibles y aca se saltean.
-# tvb, iap e iao salieron de wg e ia: son de Windows 10 y 11 igual que la opcion de la que vienen.
-$SoloWin10 = @('ver', 'rep', 'av', 'bl', 'mc', 'rc', 'wg', 'tvb', 'sv', 'nvl', 'bt', 'old', 'msx', 'dold', 'dball', 'lang', 'acc', 'ia', 'iap', 'iao', 'db', 'edge', 'drv', 'ms_acc', 'al', 'cta')
+# Las opciones que salieron de dividir una que pedia reiniciar (ad -> bng, pv -> pvu...pvm) lo siguen pidiendo igual.
+$ReinDebloat = @('av', 'rc', 'ad', 'bng', 'sv', 'pv', 'pvu', 'pvs', 'pve', 'pvv', 'pvm', 'ms_acc', 'al', 'cta')
 
 # Tareas de telemetria (opcion "Reducir la telemetria")
 $TareasTelemetria = @(
@@ -70,6 +65,9 @@ $ClavesAnuncios = @(
     'SubscribedContent-353696Enabled', 'SubscribedContent-353698Enabled'
 )
 
+# Menu del clic derecho de Windows 11 (opcion "cmc"): si esta clase esta en HKCU con InprocServer32 vacio, el Explorador usa el menu clasico
+$ClsidMenuNuevo = '{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}'
+
 # Apps de Xbox que siguen pudiendo correr en segundo plano aunque se bloqueen las demas (opcion "apps"):
 # app de Xbox, Game Bar, inicio de sesion de Xbox, Accesorios de Xbox, transcripcion del chat, Gaming Services,
 # Minecraft Bedrock y el Launcher de Minecraft.
@@ -85,28 +83,6 @@ $TareasOffice = @('\Microsoft\Office\Office Startup Boost', '\Microsoft\Office\O
 
 # Servicios de Xbox (opcion "xbs"). Gaming Services (GamingServices, GamingServicesNet) no se toca aca: sin el no anda Game Pass (solo lo quita "xbt" de Gaming).
 $ServiciosXbox = @('XblAuthManager', 'XblGameSave', 'XboxGipSvc', 'XboxNetApiSvc')
-
-# Servidores de telemetria que se bloquean en el archivo hosts
-$HostsTelemetria = @(
-    'vortex.data.microsoft.com', 'vortex-win.data.microsoft.com', 'v10.vortex-win.data.microsoft.com',
-    'us.vortex-win.data.microsoft.com', 'eu.vortex-win.data.microsoft.com', 'v10.events.data.microsoft.com',
-    'v20.events.data.microsoft.com', 'self.events.data.microsoft.com', 'umwatson.events.data.microsoft.com',
-    'watson.events.data.microsoft.com', 'telecommand.telemetry.microsoft.com',
-    'telecommand.telemetry.microsoft.com.nsatc.net', 'oca.telemetry.microsoft.com',
-    'oca.telemetry.microsoft.com.nsatc.net', 'sqm.telemetry.microsoft.com',
-    'sqm.telemetry.microsoft.com.nsatc.net', 'watson.telemetry.microsoft.com',
-    'watson.telemetry.microsoft.com.nsatc.net', 'watson.ppe.telemetry.microsoft.com',
-    'df.telemetry.microsoft.com', 'reports.wes.df.telemetry.microsoft.com', 'wes.df.telemetry.microsoft.com',
-    'services.wes.df.telemetry.microsoft.com', 'sqm.df.telemetry.microsoft.com', 'telemetry.microsoft.com',
-    'telemetry.urs.microsoft.com', 'telemetry.appex.bing.net', 'redir.metaservices.microsoft.com',
-    'choice.microsoft.com', 'choice.microsoft.com.nsatc.net', 'settings-sandbox.data.microsoft.com',
-    'vortex-sandbox.data.microsoft.com', 'survey.watson.microsoft.com', 'watson.live.com',
-    'watson.microsoft.com', 'statsfe2.ws.microsoft.com', 'corpext.msitadfs.glbdns2.microsoft.com',
-    'compatexchange.cloudapp.net'
-)
-
-# Nunca se bloquean los servidores de la activacion y las licencias de Windows (aunque alguien los sume a la lista)
-$HostsTelemetria = @($HostsTelemetria | Where-Object { $_ -notmatch '(?i)(^|\.)(sls|licensing|activation|validation|displaycatalog|purchase|login\.live)\.' })
 
 # ------------------------------------------------------------
 # Submenus de la app: que se puede elegir en "Servicios del Sistema" (seguros y extremos), "Apps del Sistema" y en las apps
@@ -179,7 +155,8 @@ $Elegibles = @{
         (Elegible 'SessionEnv' 'Escritorio remoto: sesiones' 'Que es: prepara las sesiones de Escritorio remoto. Apagarlo: + un servicio menos / - no anda Escritorio remoto.' $false $false $false $true '' 'rdp'),
         (Elegible 'UmRdpService' 'Escritorio remoto: aparatos' 'Que es: pasa impresoras y discos a Escritorio remoto. Apagarlo: + un servicio menos / - no anda Escritorio remoto.' $false $false $false $true '' 'rdp'),
         (Elegible 'Themes' 'Temas' 'Que es: el estilo visual de Windows (temas y fondos). Apagarlo: + ahorra poca RAM / - los programas clasicos se ven viejos y planos.' $false $false $false $true '' 'tem'),
-        (Elegible 'WSAIFabricSvc' 'IA de Windows (AI Fabric)' 'Que es: corre los modelos de IA locales de Windows. Apagarlo: + un servicio menos / - no andan Click to Do ni la IA de Fotos y Paint.' $false $false $false $true '' 'aif')
+        (Elegible 'WSAIFabricSvc' 'IA de Windows (AI Fabric)' 'Que es: corre los modelos de IA locales de Windows. Apagarlo: + un servicio menos / - no andan Click to Do ni la IA de Fotos y Paint.' $false $false $false $true '' 'aif'),
+        (Elegible 'DPS' 'Diagnostico de Windows' 'Que es: busca problemas solo y arranca los hosts de diagnostico. Apagarlo: + uno a tres procesos menos / - Windows no detecta problemas solo y el uso de apps y bateria de Configuracion no se actualiza.' $false $false $false $true '' 'dia')
     )
     # Apps: las basura (marcadas) salen de $AppsBasura; estas son las que se pueden sumar a mano
     db = @(
@@ -236,7 +213,7 @@ $KeepModernas = '^(Microsoft\.\w*(Video|Image|Media)Extension|Microsoft\.ScreenS
 
 # Inicio original de cada servicio de "Servicios del Sistema": se anota antes de apagarlo y Restablecer lo devuelve tal cual estaba
 # Sin anotar (lo apago otra version o una opcion vieja), vuelven a su inicio de Windows: estos automaticos y el resto en Manual
-$SvcIniDef = @{ TrkWks = 'auto'; LanmanServer = 'auto'; 'NVDisplay.ContainerLocalSystem' = 'auto'; Themes = 'auto'; WSAIFabricSvc = 'auto'; InventorySvc = 'delayed-auto'; whesvc = 'delayed-auto' }
+$SvcIniDef = @{ TrkWks = 'auto'; LanmanServer = 'auto'; 'NVDisplay.ContainerLocalSystem' = 'auto'; Themes = 'auto'; WSAIFabricSvc = 'auto'; InventorySvc = 'delayed-auto'; whesvc = 'delayed-auto'; DPS = 'auto' }
 function Svc-Archivo { return (Join-Path (Join-Path $env:ProgramData 'Brio') 'svc_orig.txt') }
 function Svc-Inicio([string]$n) {
     $p = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $n) -ErrorAction SilentlyContinue
@@ -319,27 +296,23 @@ function Quitar-Protegida([string]$n) {
 function Hosts-Tiene([string]$h) {
     try { return ([IO.File]::ReadAllText($h, [Text.Encoding]::Default)).Contains('# xuca-telemetria') } catch { return $false }
 }
-
-# Politicas del antivirus, SmartScreen y Smart App Control
-function Av-RegsOff {
-    $def = 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender'
-    Reg-Set $def 'DisableAntiSpyware' 'REG_DWORD' '1'
-    Reg-Set $def 'PUAProtection' 'REG_DWORD' '0'
-    foreach ($n in 'DisableRealtimeMonitoring', 'DisableBehaviorMonitoring', 'DisableOnAccessProtection', 'DisableScanOnRealtimeEnable', 'DisableIOAVProtection') { Reg-Set ($def + '\Real-Time Protection') $n 'REG_DWORD' '1' }
-    Reg-Set ($def + '\Spynet') 'SpynetReporting' 'REG_DWORD' '0'
-    Reg-Set ($def + '\Spynet') 'SubmitSamplesConsent' 'REG_DWORD' '2'
-    Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Notifications' 'DisableNotifications' 'REG_DWORD' '1'
-    Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Windows\System' 'EnableSmartScreen' 'REG_DWORD' '0'
-    Reg-Set 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' 'SmartScreenEnabled' 'REG_SZ' 'Off'
-    Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\AppHost' 'EnableWebContentEvaluation' 'REG_DWORD' '0'
-    Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Edge' 'SmartScreenEnabled' 'REG_DWORD' '0'
-    Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Edge' 'SmartScreenPuaEnabled' 'REG_DWORD' '0'
-    foreach ($n in 'ServiceEnabled', 'NotifyMalicious', 'NotifyPasswordReuse', 'NotifyUnsafeApp') { Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WTDS\Components' $n 'REG_DWORD' '0' }
-    Reg-Set 'HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy' 'VerifiedAndReputablePolicyState' 'REG_DWORD' '0'
-    Reg-Del 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' 'SecurityHealth'
-    Reg-Del 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' 'SecurityHealth'
+# Los renglones del hosts sin los que agrego una version vieja (y sin el renglon vacio que ponia antes de ellos): queda como estaba
+function Hosts-SinBrio([string[]]$lineas) {
+    $l = New-Object System.Collections.Generic.List[string]
+    $enBloque = $false
+    foreach ($x in $lineas) {
+        if ($x.Contains('# xuca-telemetria')) {
+            if ((-not $enBloque) -and ($l.Count -gt 0) -and ($l[$l.Count - 1] -eq '')) { $l.RemoveAt($l.Count - 1) }
+            $enBloque = $true
+            continue
+        }
+        $enBloque = $false
+        $l.Add($x)
+    }
+    return , $l.ToArray()
 }
 
+# Brio ya no apaga el antivirus. Esto solo deshace lo que dejaban las versiones viejas (politicas de Defender, SmartScreen y Edge).
 function Av-RegsOn {
     $def = 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender'
     Reg-Del $def 'DisableAntiSpyware'
@@ -351,7 +324,7 @@ function Av-RegsOn {
     Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Windows\System' 'EnableSmartScreen'
     Reg-Set 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' 'SmartScreenEnabled' 'REG_SZ' 'Warn'
     Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\AppHost' 'EnableWebContentEvaluation' 'REG_DWORD' '1'
-    # Las politicas de Edge que puso Av-RegsOff (si quedan, Edge sigue sin SmartScreen y dice "administrado por tu organizacion")
+    # Las politicas de Edge que ponian las versiones viejas (si quedan, Edge sigue sin SmartScreen y dice "administrado por tu organizacion")
     Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Edge' 'SmartScreenEnabled'
     Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Edge' 'SmartScreenPuaEnabled'
     Reg-Set 'HKCU\Software\Microsoft\Edge' 'SmartScreenEnabled' 'REG_DWORD' '1'
@@ -672,7 +645,7 @@ function Navegadores-Instalados {
 # ------------------------------------------------------------
 # Las acciones (antes cada una abria su propio PowerShell desde el .bat). Devuelven un codigo:
 # 0 = hecho, 1 = fallo, 2 = no aplica, 3 = instalador lanzado, 4 = cancelado, 5 = ya estaba, 6 = queda un paso para despues.
-# $XDato: los valores para SPI (efectos visuales). $XChk: AV_OFF solo revisa si ya estaba todo apagado.
+# $XDato: los valores para SPI (efectos visuales).
 # ------------------------------------------------------------
 # Programas instalados (nombre y version), leidos directo del registro.
 # Get-ItemProperty sobre Uninstall\* se rompe entero ("La conversion especificada no es valida") si un programa dejo un valor mal guardado.
@@ -698,7 +671,7 @@ function Programas-Instalados {
     }
 }
 
-function Debloat-Act([string]$XAct, [string]$XDato, [bool]$XChk) {
+function Debloat-Act([string]$XAct, [string]$XDato) {
     $code = 0
     # Quitar-Apps y Quitar-Contrasena anotan sus errores aca (antes tocaban el codigo de todo el script)
     $global:XMal = $false
@@ -804,47 +777,6 @@ function Debloat-Act([string]$XAct, [string]$XDato, [bool]$XChk) {
             if ($LASTEXITCODE -eq 0) { Log 'OK' 'powercfg /hibernate on' } else { Log 'FALLO' 'powercfg /hibernate on'; $code = 1 }
             if ([IO.File]::Exists($env:SystemDrive + '\hiberfil.sys')) { Log 'OK' 'verificado: hiberfil.sys existe' }
             else { Log 'FALLO' 'no aparecio hiberfil.sys'; $code = 1 }
-        }
-    }
-
-    'AV_OFF' {
-        if (Test-AvOff) {
-            Log 'OK' 'ya estaba todo apagado'
-            $code = 5
-        } elseif (-not $XChk) {
-            $ops = @(
-                @{ N = 'proteccion en tiempo real'; S = { Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction Stop } },
-                @{ N = 'monitoreo de comportamiento'; S = { Set-MpPreference -DisableBehaviorMonitoring $true -ErrorAction Stop } },
-                @{ N = 'analisis de descargas'; S = { Set-MpPreference -DisableIOAVProtection $true -ErrorAction Stop } },
-                @{ N = 'analisis de scripts'; S = { Set-MpPreference -DisableScriptScanning $true -ErrorAction Stop } },
-                @{ N = 'bloqueo al primer vistazo'; S = { Set-MpPreference -DisableBlockAtFirstSeen $true -ErrorAction Stop } },
-                @{ N = 'proteccion en la nube'; S = { Set-MpPreference -MAPSReporting 0 -ErrorAction Stop } },
-                @{ N = 'envio automatico de muestras'; S = { Set-MpPreference -SubmitSamplesConsent 2 -ErrorAction Stop } },
-                @{ N = 'proteccion de red'; S = { Set-MpPreference -EnableNetworkProtection Disabled -ErrorAction Stop } },
-                @{ N = 'acceso controlado a carpetas'; S = { Set-MpPreference -EnableControlledFolderAccess Disabled -ErrorAction Stop } },
-                @{ N = 'bloqueo de apps no deseadas'; S = { Set-MpPreference -PUAProtection Disabled -ErrorAction Stop } }
-            )
-            $script:AvFallos = 0
-            foreach ($o in $ops) {
-                try { & $o.S } catch { Log 'FALLO' ($o.N + ': ' + $_.Exception.Message); $code = 1; $script:AvFallos++ }
-            }
-            Start-Sleep -Seconds 2
-            $s = Get-MpComputerStatus
-            $m = Get-MpPreference
-            $vf = @(
-                @{ N = 'proteccion en tiempo real'; V = ($s.RealTimeProtectionEnabled -eq $false) },
-                @{ N = 'monitoreo de comportamiento'; V = ($s.BehaviorMonitorEnabled -eq $false) },
-                @{ N = 'analisis de descargas'; V = ($s.IoavProtectionEnabled -eq $false) },
-                @{ N = 'proteccion de acceso'; V = ($s.OnAccessProtectionEnabled -eq $false) },
-                @{ N = 'proteccion en la nube'; V = ($m.MAPSReporting -eq 0) },
-                @{ N = 'proteccion de red'; V = ($m.EnableNetworkProtection -eq 0) },
-                @{ N = 'acceso controlado a carpetas'; V = ($m.EnableControlledFolderAccess -eq 0) },
-                @{ N = 'bloqueo de apps no deseadas'; V = ($m.PUAProtection -eq 0) }
-            )
-            foreach ($c in $vf) {
-                if ($c.V) { Log 'OK' ('verificado: ' + $c.N + ' apagada') }
-                else { Log 'FALLO' ($c.N + ' sigue encendida (probablemente por la Proteccion contra alteraciones)'); $code = 1; $script:AvFallos++ }
-            }
         }
     }
 
@@ -1614,22 +1546,7 @@ function Debloat-Act([string]$XAct, [string]$XDato, [bool]$XChk) {
         if ($quedo -gt 0) { Say ('  Quedaron {0} carpetas que Windows no dejo borrar o que siguen en uso.' -f $quedo) 'Yellow' }
     }
 
-    'FUN_OFF' {
-        $feats = 'Internet-Explorer-Optional-amd64', 'FaxServicesClientPackage', 'WindowsMediaPlayer'
-        $hay = 0; $hizo = 0; $mal = 0
-        foreach ($f in $feats) {
-            $x = Get-WindowsOptionalFeature -Online -FeatureName $f -ErrorAction SilentlyContinue
-            if (-not $x) { Log 'OMITIDO' ($f + ' no existe en esta version de Windows'); continue }
-            $hay++
-            if ([string]$x.State -eq 'Disabled') { Log 'OK' ('ya estaba desactivada ' + $f); continue }
-            Disable-WindowsOptionalFeature -Online -FeatureName $f -NoRestart -ErrorAction SilentlyContinue | Out-Null
-            $est = [string](Get-WindowsOptionalFeature -Online -FeatureName $f -ErrorAction SilentlyContinue).State
-            if ($est -eq 'Disabled' -or $est -eq 'DisablePending') { $hizo++; Log 'OK' ('desactivada ' + $f + ' (' + $est + ')') }
-            else { $mal++; Log 'FALLO' ('no se pudo desactivar ' + $f + ', quedo ' + $est); $code = 1 }
-        }
-        if ($mal -eq 0) { if ($hizo -gt 0) { $code = 0 } elseif ($hay -gt 0) { $code = 5 } else { $code = 2 } }
-    }
-
+    # Solo para restablecer "sv": hasta v1.0.13 apagaba estas funciones (ahora las quitan "old" y "dold")
     'FUN_ON' {
         $feats = 'Internet-Explorer-Optional-amd64', 'FaxServicesClientPackage', 'WindowsMediaPlayer'
         $hay = 0; $hizo = 0; $mal = 0
@@ -2387,7 +2304,7 @@ public static class SpiNative {
 }
 
 # Corre una accion y devuelve su codigo (si se rompe, queda como PS-ERROR en el log)
-function Act([string]$a, [string]$dato = '', [bool]$chk = $false) { return (Hacer { Debloat-Act $a $dato $chk } $a) }
+function Act([string]$a, [string]$dato = '') { return (Hacer { Debloat-Act $a $dato } $a) }
 
 # ------------------------------------------------------------
 # Las opciones, en el orden en que se aplican. La app arma las casillas con Id, Seccion, Q, Hace, Favor y Contra.
@@ -2572,45 +2489,11 @@ $ListaOpciones = @(
         }
     },
     @{
+        # Solo restaurar: Brio ya no apaga el antivirus. Queda para quien lo apago con una version vieja (Herramientas > Restaurar el antivirus).
         Id = 'av'; Seccion = 'SEGURIDAD'
-        Q = '- Desea apagar TODO el antivirus? (Defender, SmartScreen y Smart App Control; la PC queda sin proteccion)'
-        Hace = 'apaga Defender, SmartScreen y Smart App Control.'
-        Favor = 'menos uso de CPU y disco, y ningun analisis en medio de una partida.'
-        Contra = 'la PC queda sin proteccion contra virus y Smart App Control no se vuelve a encender sin reinstalar Windows. Si tenes Riot Vanguard, se borra: REINICIA LA PC SIN FALTA antes de volver a instalarlo (o abrir VALORANT o LoL), o pueden salir errores y bucles de instalacion.'
-        Antes = {
-            'AVISO: si tenes Riot Vanguard, se borra solo si una opcion de seguridad cambia algo de verdad (si ya la tenias asi, no se toca); se desinstala del todo, se cierra Riot y lo volves a instalar abriendo el cliente de Riot. REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.'
-            ''
-            'AVISO: Smart App Control no se puede volver a encender sin reinstalar Windows.'
-            'AVISO: la Proteccion contra alteraciones la apagas vos; el script abre la pagina.'
-            'AVISO: con R, volve a activar la Proteccion contra alteraciones en Seguridad de Windows.'
-        }
-        S = {
-            Opt-Ini 'Antivirus de Windows'
-            Say '  Revisando el estado del antivirus, un momento...'
-            if ((Act 'AV_OFF' '' $true) -ge 5) {
-                Av-RegsOff
-                $script:OptS++
-                Opt-Fin 'Antivirus, SmartScreen y Smart App Control desactivados'
-                return
-            }
-            Say ''
-            Say '  Apaga ahora la Proteccion contra alteraciones: se abre la pagina de Seguridad de Windows.'
-            Say '  Cuando la apagues, volve aca.'
-            Av-RegsOff
-            $script:AvFallos = 0
-            Resps (Act 'AV_OFF')
-            # Cada ajuste que no se pudo apagar cuenta como un fallo (antes 3 lineas FALLO se informaban como 1)
-            if ($script:AvFallos -gt 1) { $script:OptF += ($script:AvFallos - 1); $script:OptT += ($script:AvFallos - 1) }
-            Opt-Fin $(if ($script:OptF -gt 0) { 'Antivirus: NO se pudo apagar, sigue encendido' } else { 'Antivirus, SmartScreen y Smart App Control desactivados' })
-            if ($script:OptF -gt 0) {
-                Say '  EL ANTIVIRUS SIGUE ENCENDIDO: casi seguro la Proteccion contra alteraciones esta encendida. Apagala en Seguridad de Windows y repeti.' 'Red'
-                Log 'ATENCION' 'el antivirus sigue encendido (no esta desactivado): apagar la Proteccion contra alteraciones en Seguridad de Windows y volver a aplicar'
-                if ($env:XR_XRES -eq '1') { Say 'XRES|aviso|El antivirus SIGUE ENCENDIDO: Windows no dejo apagarlo, casi seguro porque la Proteccion contra alteraciones esta encendida. Apagala en Seguridad de Windows > Proteccion antivirus y contra amenazas > Configuracion de antivirus y proteccion contra amenazas > Proteccion contra alteraciones, y volve a aplicar.' }
-            } else {
-                # Solo si el antivirus de verdad se apago se avisa lo de reiniciar antes de jugar Valorant y se toca Vanguard
-                Vanguard-Check
-            }
-        }
+        Q = '- Desea restaurar el antivirus? (Defender y SmartScreen, si los apago una version vieja de Brio)'
+        Hace = 'vuelve a encender Defender y SmartScreen como vienen en Windows.'
+        Saltar = { (Respuesta 'av') -ne 'R' }
         R = {
             Opt-Ini 'Antivirus de Windows (restaurar)'
             Av-RegsOn
@@ -2768,7 +2651,9 @@ $ListaOpciones = @(
         }
         R = {
             Opt-Ini 'Sonido de inicio (restaurar)'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' 'DisableStartupSound' 'REG_DWORD' '0'
+            # Windows 10 viene sin sonido de inicio (1) y Windows 11 con sonido (0): se deja como viene en cada uno
+            $ini = $(if (($script:Build -gt 0) -and ($script:Build -lt 22000)) { '1' } else { '0' })
+            Reg-Set 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation' 'DisableStartupSound' 'REG_DWORD' $ini
             Opt-Fin 'Sonido de inicio restaurado'
         }
     },
@@ -2783,7 +2668,7 @@ $ListaOpciones = @(
             Opt-Ini 'Efectos visuales'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'TaskbarAnimations' 'REG_DWORD' '0'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'ListviewAlphaSelect' 'REG_DWORD' '0'
-            Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'IconsOnly' 'REG_DWORD' '0'
+            # Las miniaturas (IconsOnly) son de "Iconos en vez de miniaturas" (thm): esta opcion no las toca para no pisarla
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'ListviewShadow' 'REG_DWORD' '0'
             Reg-Set 'HKCU\Control Panel\Desktop\WindowMetrics' 'MinAnimate' 'REG_SZ' '0'
             Reg-Set 'HKCU\Software\Microsoft\Windows\DWM' 'AlwaysHibernateThumbnails' 'REG_DWORD' '0'
@@ -2796,7 +2681,6 @@ $ListaOpciones = @(
             Opt-Ini 'Efectos visuales (restaurar)'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'TaskbarAnimations' 'REG_DWORD' '1'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'ListviewAlphaSelect' 'REG_DWORD' '1'
-            Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'IconsOnly' 'REG_DWORD' '0'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'ListviewShadow' 'REG_DWORD' '1'
             Reg-Set 'HKCU\Control Panel\Desktop\WindowMetrics' 'MinAnimate' 'REG_SZ' '1'
             Reg-Del 'HKCU\Software\Microsoft\Windows\DWM' 'AlwaysHibernateThumbnails'
@@ -2843,6 +2727,36 @@ $ListaOpciones = @(
             Opt-Ini 'Finalizar tarea (restaurar)'
             Reg-Set 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings' 'TaskbarEndTask' 'REG_DWORD' '0'
             Opt-Fin 'Finalizar tarea quitado del clic derecho'
+        }
+    },
+    @{
+        # Menu clasico: una clave vacia en HKCU tapa el menu nuevo de Windows 11 (solo para tu usuario). R borra esa clave.
+        Id = 'cmc'; Seccion = 'INTERFAZ Y COMODIDAD'
+        Q = '- Desea volver al menu del clic derecho clasico? (Windows 11: todas las opciones de una, sin "Mostrar mas opciones")'
+        Hace = 'en Windows 11, el clic derecho en el Explorador y el escritorio vuelve a mostrar el menu completo de siempre, sin tener que tocar "Mostrar mas opciones". Solo cambia tu usuario y reinicia el Explorador.'
+        Favor = 'llegas de una a las opciones de tus programas (7-Zip, WinRAR, editores) sin un clic de mas.'
+        Contra = 'se pierde el menu nuevo con los iconos de copiar, pegar y renombrar arriba. La barra de tareas parpadea un momento al aplicarlo.'
+        Saltar = {
+            if (($script:Build -gt 0) -and ($script:Build -lt 22000)) { Log 'SALTADO' ('Menu del clic derecho clasico: necesita Windows 11 - build ' + $script:Build); return $true }
+            return $false
+        }
+        S = {
+            Opt-Ini 'Menu del clic derecho clasico'
+            Reg-Set ('HKCU\Software\Classes\CLSID\' + $ClsidMenuNuevo + '\InprocServer32') '' 'REG_SZ' ''
+            if ($script:OptT -gt 0) { Act 'EXPLORER_RESTART' | Out-Null }
+            Opt-Fin 'Menu del clic derecho clasico activo'
+        }
+        R = {
+            Opt-Ini 'Menu del clic derecho clasico (restaurar)'
+            $base = 'HKCU\Software\Classes\CLSID'
+            if (-not (Reg-Existe ($base + '\' + $ClsidMenuNuevo))) { Ya-Estaba; Log 'OK' 'ya no existia la clave del menu clasico' }
+            else {
+                $k = $null
+                try { $k = Reg-Abrir $base 'borrar'; $k.DeleteSubKeyTree($ClsidMenuNuevo, $false) } catch { Log 'INFO' ('no se pudo borrar la clave del menu clasico: ' + $_.Exception.Message) } finally { if ($k) { $k.Dispose() } }
+                Res (-not (Reg-Existe ($base + '\' + $ClsidMenuNuevo))) 'clave del menu clasico borrada'
+                Act 'EXPLORER_RESTART' | Out-Null
+            }
+            Opt-Fin 'Menu del clic derecho de Windows 11 restaurado'
         }
     },
     @{
@@ -3127,37 +3041,39 @@ $ListaOpciones = @(
     },
     @{
         Id = 'sv'; Seccion = 'SERVICIOS Y FUNCIONES QUE CASI NADIE USA'
-        Q = '- Desea desactivar servicios y funciones que casi nadie usa? (Fax y Escaner, Internet Explorer, Media Player viejo, Mapas y mas)'
-        Hace = 'apaga servicios de Fax, Mapas, modo demo, geolocalizacion y reportes de error, y quita Internet Explorer, Fax y Escaner y el Media Player viejo.'
-        Favor = 'menos servicios y funciones cargadas en Windows.'
-        Contra = 'si usas el escaner de Windows o el Media Player viejo, dejan de estar.'
+        # v1.0.13: solo servicios. Internet Explorer, Fax y Escaner y el Media Player viejo los quitan "old" (con restablecer) y "dold".
+        Q = '- Desea desactivar servicios que casi nadie usa? (Fax, Mapas, modo demo, ubicacion y reportes de error)'
+        Hace = 'apaga los servicios de Fax, Mapas, modo demo, ubicacion y reportes de error. Internet Explorer, Fax y Escaner y el Media Player viejo los quita "Quitar componentes viejos".'
+        Favor = 'menos servicios cargados en Windows.'
+        Contra = 'no podes mandar faxes desde Windows, las apps que usan tu ubicacion no la encuentran y Windows no junta informes de errores.'
         S = {
-            Opt-Ini 'Servicios y funciones que casi nadie usa'
+            Opt-Ini 'Servicios que casi nadie usa'
             Svc 'Fax' 'disabled' '4'
             Svc 'MapsBroker' 'disabled' '4'
             Svc 'RetailDemo' 'disabled' '4'
             Svc 'lfsvc' 'disabled' '4'
             Svc 'WerSvc' 'disabled' '4'
-            Say '  Revisando las funciones de Windows, un momento...'
-            Resps (Act 'FUN_OFF')
-            Opt-Fin 'Servicios y funciones que casi nadie usa desactivados (algunas se aplican al reiniciar)'
+            Opt-Fin 'Servicios que casi nadie usa desactivados (se aplica al reiniciar)'
         }
         R = {
-            Opt-Ini 'Servicios y funciones que casi nadie usa (restaurar)'
+            Opt-Ini 'Servicios que casi nadie usa (restaurar)'
             Svc 'Fax' 'demand' '3'
             Svc 'MapsBroker' 'delayed-auto' '2'
             Svc 'RetailDemo' 'demand' '3'
             Svc 'lfsvc' 'demand' '3'
             Svc 'WerSvc' 'demand' '3'
-            Say '  Reactivando las funciones de Windows, un momento...'
-            Resps (Act 'FUN_ON')
-            Opt-Fin 'Servicios y funciones restaurados (algunas se aplican al reiniciar)'
+            # Hasta v1.0.13 esta opcion tambien apagaba esas funciones: vuelven, salvo que las haya quitado "old" o "dold" (su restablecer las devuelve)
+            if (-not ((Test-Path -LiteralPath (Join-Path $env:ProgramData 'Brio\old_apagado.txt')) -or (Test-Path -LiteralPath (Join-Path $env:ProgramData 'Brio\sv_dold.txt')))) {
+                Say '  Reactivando las funciones de Windows que apagaban las versiones viejas, un momento...'
+                Resps (Act 'FUN_ON')
+            }
+            Opt-Fin 'Servicios restaurados (algunos se aplican al reiniciar)'
         }
     },
     @{
         Id = 'rsv'; Seccion = 'SERVICIOS Y FUNCIONES QUE CASI NADIE USA'
         Q = '- Desea apagar servicios del sistema que casi nadie usa para liberar RAM? (Elegis en la lista: Seguros marcados; Extremos, con riesgo, los marcas vos; no toca Xbox ni Windows Hello)'
-        Hace = 'apaga o vuelve a prender los servicios del sistema que elijas en una lista, cada uno con su estado (Activo, Manual o Apagado). Los Seguros (Billetera, NFC, zona wifi movil, control parental, Insider, administracion remota y otros) vienen marcados; los Extremos (telefono, tarjetas inteligentes, camara, sensores, Wi-Fi Direct, Historial de archivos, compartir carpetas, Hyper-V, red local, Escritorio remoto, Temas, el contenedor de NVIDIA, el inventario de compatibilidad, la IA de Windows y mas) los marcas vos y cada uno dice que se pierde. Tambien podes volver a prender servicios sueltos: los Apagados (deshabilitados) salen en gris y los marcas. Solo cuenta como apagado un servicio deshabilitado: uno en Manual o Activo se apaga recien cuando lo marcas. Nunca toca los servicios de Xbox, Windows Hello ni el PIN.'
+        Hace = 'apaga o vuelve a prender los servicios del sistema que elijas en una lista, cada uno con su estado (Activo, Manual o Apagado). Los Seguros (Billetera, NFC, zona wifi movil, control parental, Insider, administracion remota y otros) vienen marcados; los Extremos (telefono, tarjetas inteligentes, camara, sensores, Wi-Fi Direct, Historial de archivos, compartir carpetas, Hyper-V, red local, Escritorio remoto, Temas, el contenedor de NVIDIA, el inventario de compatibilidad, la IA de Windows, el diagnostico de Windows y mas) los marcas vos y cada uno dice que se pierde. Tambien podes volver a prender servicios sueltos: los Apagados (deshabilitados) salen en gris y los marcas. Solo cuenta como apagado un servicio deshabilitado: uno en Manual o Activo se apaga recien cuando lo marcas. Nunca toca los servicios de Xbox, Windows Hello ni el PIN.'
         Favor = 'menos servicios cargados: libera algo de RAM y procesos en segundo plano.'
         Contra = 'cada servicio que apagues quita su funcion (la lista dice cual). Restablecer devuelve cada uno a como estaba antes.'
         S = {
@@ -3178,6 +3094,9 @@ $ListaOpciones = @(
             # Versiones anteriores apagaban aca la biometria (Windows Hello con huella o cara): si quedo apagada vuelve a Manual
             $wb = Svc-Inicio 'WbioSrvc'
             if ($wb -and ([int]$wb.Start -eq 4)) { Log 'INFO' 'WbioSrvc estaba deshabilitado (version anterior): vuelve a Manual'; Svc 'WbioSrvc' 'demand' '3'; Svc-Arrancar 'WbioSrvc' }
+            # Hasta v1.0.13 "Diagnostico en manual" (dia) dejaba DPS en Manual: vuelve a Automatico, como viene en Windows
+            $dp = Svc-Inicio 'DPS'
+            if ($dp -and ([int]$dp.Start -eq 3)) { Log 'INFO' 'DPS estaba en Manual (opcion vieja dia): vuelve a Automatico'; Svc 'DPS' 'auto' '2'; Svc-Arrancar 'DPS' }
             # La v1.0.11 apagaba aca los servicios de Xbox: si siguen deshabilitados vuelven a Manual (como vienen en Windows).
             # Si estan bien, no se tocan. Para tenerlos apagados a proposito esta la opcion "xbs".
             foreach ($n in $ServiciosXbox) {
@@ -3209,24 +3128,36 @@ $ListaOpciones = @(
         }
     },
     @{
-        Id = 'nvl'; Seccion = 'APPS Y PROCESOS EN SEGUNDO PLANO'
-        Q = '- Desea apagar los servicios y tareas extra de NVIDIA? (NVIDIA App, overlay y ShadowPlay quedan sin contenedor; el driver y el Panel de control siguen)'
-        Hace = 'pasa a manual y detiene el servicio que usan la app de NVIDIA, el overlay y la grabacion ShadowPlay, y apaga el que manda datos de uso y las tareas que buscan drivers y actualizaciones. No toca el servicio de pantalla: sin ese no abre el Panel de control de NVIDIA ni se mantienen los colores y G-Sync.'
-        Favor = 'hay menos procesos de NVIDIA abiertos y se libera algo de RAM, sin perder el driver.'
+        # v1.0.13: junta "Apagar extras de NVIDIA" (nvl) y "Telemetria de NVIDIA" (tpn), que apagaban el mismo servicio y las mismas tareas.
+        # Las tareas NvTm* de la telemetria entran en el filtro de abajo (con cualquier GUID).
+        Id = 'nvx'; Seccion = 'APPS Y PROCESOS EN SEGUNDO PLANO'
+        Q = '- Desea apagar los extras y la telemetria de NVIDIA? (NVIDIA App, overlay y ShadowPlay quedan sin contenedor; el driver y el Panel de control siguen. Sin placa NVIDIA no cambia nada)'
+        Hace = 'pasa a manual y detiene el servicio que usan la app de NVIDIA, el overlay y la grabacion ShadowPlay; apaga el servicio de telemetria, la recoleccion de datos del driver y del Panel de control y las tareas que mandan datos de uso y buscan drivers y actualizaciones. No toca el servicio de pantalla: sin ese no abre el Panel de control de NVIDIA ni se mantienen los colores y G-Sync.'
+        Favor = 'hay menos procesos de NVIDIA abiertos, se libera algo de RAM y se mandan menos datos, sin perder el driver.'
         Contra = 'el overlay, ShadowPlay y los filtros de la app de NVIDIA no andan hasta que el servicio corra. Si la app no abre bien, restablece la opcion. Los drivers los actualizas vos.'
         S = {
-            Opt-Ini 'NVIDIA liviano'
+            Opt-Ini 'Extras y telemetria de NVIDIA'
             Svc 'NvContainerLocalSystem' 'demand' '3'; Svc-Parar 'NvContainerLocalSystem'
             Svc 'NvTelemetryContainer' 'disabled' '4'; Svc-Parar 'NvTelemetryContainer'
+            if (Test-Path -LiteralPath 'HKLM:\SOFTWARE\NVIDIA Corporation') {
+                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID44231' 'REG_DWORD' '0'
+                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID64640' 'REG_DWORD' '0'
+                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID66610' 'REG_DWORD' '0'
+                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\NvControlPanel2\Client' 'OptInOrOutPreference' 'REG_DWORD' '0'
+            }
             foreach ($t in @(Get-ScheduledTask -TaskPath '\' -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -match '^(NvDriverUpdateCheckDaily|NVIDIA App SelfUpdate|NvTmMon|NvTmRep|NvTmRepOnLogon|NvProfileUpdater)' })) { Tarea ('\' + $t.TaskName) 'disable' }
-            Opt-Fin 'NVIDIA liviano: contenedor en manual y tareas extra apagadas'
+            Opt-Fin 'Extras y telemetria de NVIDIA apagados: contenedor en manual y tareas extra apagadas'
         }
         R = {
-            Opt-Ini 'NVIDIA liviano (restaurar)'
+            Opt-Ini 'Extras y telemetria de NVIDIA (restaurar)'
             Svc 'NvContainerLocalSystem' 'auto' '2'; Svc-Arrancar 'NvContainerLocalSystem'
             Svc 'NvTelemetryContainer' 'auto' '2'
+            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID44231'
+            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID64640'
+            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID66610'
+            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\NvControlPanel2\Client' 'OptInOrOutPreference'
             foreach ($t in @(Get-ScheduledTask -TaskPath '\' -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -match '^(NvDriverUpdateCheckDaily|NVIDIA App SelfUpdate|NvTmMon|NvTmRep|NvTmRepOnLogon|NvProfileUpdater)' })) { Tarea ('\' + $t.TaskName) 'enable' }
-            Opt-Fin 'NVIDIA restaurado'
+            Opt-Fin 'Extras y telemetria de NVIDIA restaurados'
         }
     },
     @{
@@ -3616,17 +3547,23 @@ $ListaOpciones = @(
     @{
         Id = 'usv'; Seccion = 'SERVICIOS Y FUNCIONES QUE CASI NADIE USA'
         Q = '- Desea apagar los servicios de usuario de contactos, calendario, mensajes y sincronizacion? (Extremo: baja procesos por cada sesion; la captura de pantalla sigue andando)'
-        Hace = 'apaga los servicios que Windows levanta por cada usuario: contactos y calendario (UserDataSvc, Unistore, PimIndex), sincronizacion (OneSync), mensajes, Dispositivos conectados, impresion de usuario y Defensa web. El servicio del portapapeles (cbdhsvc) se deja prendido: Recortes y Win+Shift+S lo necesitan.'
+        Hace = 'apaga los servicios que Windows levanta por cada usuario: contactos y calendario (UserDataSvc, Unistore, PimIndex), sincronizacion (OneSync), mensajes, Dispositivos conectados e impresion de usuario. El servicio del portapapeles (cbdhsvc) se deja prendido: Recortes y Win+Shift+S lo necesitan. La Defensa web (proteccion contra phishing de SmartScreen) tampoco se toca.'
         Favor = 'menos procesos svchost por sesion y algo menos de RAM.'
-        Contra = 'las apps Correo, Calendario y Contactos no sincronizan, "Compartir cerca" deja de andar y la proteccion web de Defender no corre.'
+        Contra = 'las apps Correo, Calendario y Contactos no sincronizan y "Compartir cerca" deja de andar.'
         S = {
             Opt-Ini 'Servicios de usuario'
-            foreach ($n in 'CDPUserSvc', 'DevicesFlowUserSvc', 'PimIndexMaintenanceSvc', 'UnistoreSvc', 'UserDataSvc', 'OneSyncSvc', 'MessagingService', 'PrintWorkflowUserSvc', 'webthreatdefsvc', 'webthreatdefusersvc') {
+            # La Defensa web (webthreatdefsvc y webthreatdefusersvc) es parte de SmartScreen: Brio ya no la apaga. R la sigue devolviendo.
+            foreach ($n in 'CDPUserSvc', 'DevicesFlowUserSvc', 'PimIndexMaintenanceSvc', 'UnistoreSvc', 'UserDataSvc', 'OneSyncSvc', 'MessagingService', 'PrintWorkflowUserSvc') {
                 Svc $n 'disabled' '4'
             }
             # Hasta v1.0.13 esta opcion apagaba el portapapeles (cbdhsvc) y con eso Recortes y Win+Shift+S dejaban de andar sin avisar
             $cb = Reg-Leer 'HKLM\SYSTEM\CurrentControlSet\Services\cbdhsvc' 'Start'
             if ($cb -and ([int64]$cb.Valor -eq 4)) { Log 'INFO' 'cbdhsvc estaba apagado (version vieja): vuelve a prenderse para que ande la captura de pantalla'; Svc 'cbdhsvc' 'delayed-auto' '2' }
+            # Hasta esta version tambien apagaba la Defensa web: si quedo apagada vuelve como viene en Windows
+            foreach ($w in @(@('webthreatdefsvc', 'demand', '3'), @('webthreatdefusersvc', 'auto', '2'))) {
+                $v = Reg-Leer ('HKLM\SYSTEM\CurrentControlSet\Services\' + $w[0]) 'Start'
+                if ($v -and ([int64]$v.Valor -eq 4)) { Log 'INFO' ($w[0] + ' estaba apagado (version vieja): vuelve a como viene en Windows'); Svc $w[0] $w[1] $w[2] }
+            }
             Opt-Fin 'Servicios de usuario apagados (se aplica al reiniciar sesion)'
         }
         R = {
@@ -3904,25 +3841,6 @@ $ListaOpciones = @(
         }
     },
     @{
-        Id = 'dia'; Seccion = 'APPS Y PROCESOS EN SEGUNDO PLANO'
-        Q = '- Desea poner en manual los servicios de diagnostico? (Ahorra RAM; Windows deja de buscar problemas solo)'
-        Hace = 'pone en manual el Servicio de directivas de diagnostico (DPS), que tambien arranca los hosts de diagnostico y el monitor de uso de recursos.'
-        Favor = 'uno a tres procesos menos en segundo plano: algunas decenas de MB de RAM (estimado, no medido).'
-        Contra = 'Windows deja de detectar problemas por su cuenta, y el historial de uso de apps, el uso de bateria por app y el uso de datos por app de Configuracion dejan de actualizarse. Si un solucionador de problemas dice que el servicio de diagnostico no esta corriendo, restablece esta opcion.'
-        S = {
-            Opt-Ini 'Servicios de diagnostico'
-            Svc 'DPS' 'demand' '3'
-            Svc-Parar 'DPS'
-            Opt-Fin 'Servicios de diagnostico en manual'
-        }
-        R = {
-            Opt-Ini 'Servicios de diagnostico (restaurar)'
-            Svc 'DPS' 'auto' '2'
-            Svc-Arrancar 'DPS'
-            Opt-Fin 'Servicios de diagnostico restaurados (automatico)'
-        }
-    },
-    @{
         Id = 'svh'; Seccion = 'APPS Y PROCESOS EN SEGUNDO PLANO'
         Q = '- Desea juntar los servicios de Windows en menos procesos? (Ahorra RAM; se nota con 4 GB o mas)'
         Hace = 'hace que Windows junte sus servicios en pocos procesos (svchost) en vez de uno por servicio.'
@@ -3940,7 +3858,7 @@ $ListaOpciones = @(
         }
     },
     @{
-        # v1.0.13: "Rastreo y recopilacion de datos" (pv) se dividio en pv, pvu, pvw, pvs, pve, pvv, pvm y pvl.
+        # v1.0.13: "Rastreo y recopilacion de datos" (pv) se dividio en pv, pvu, pvw, pvs, pve, pvv, pvm y pvl. Despues se quitaron pvw (Wifi Sense, ya no existe) y pvl (DRM del Media Player viejo y Grupo Hogar, que ya no existe).
         # Cada una toca solo sus claves; quien ya tenia aplicada la opcion grande ve las ocho como aplicadas.
         Id = 'pv'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
         Q = '- Desea apagar el historial de actividad? (Windows deja de anotar y subir lo que abris)'
@@ -3984,27 +3902,6 @@ $ListaOpciones = @(
             Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' 'DisableWindowsLocationProvider'
             Svc 'lfsvc' 'demand' '3'
             Opt-Fin 'Ubicacion de Windows restaurada'
-        }
-    },
-    @{
-        Id = 'pvw'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
-        Q = '- Desea apagar Wifi Sense? (Windows no se conecta solo a zonas wifi sugeridas ni reporta datos de ellas)'
-        Hace = 'apaga Wifi Sense: Windows deja de conectarse solo a redes wifi abiertas sugeridas y de reportar datos de las zonas wifi.'
-        Favor = 'tu PC no se conecta sola a redes publicas desconocidas.'
-        Contra = 'ninguno en el uso normal.'
-        S = {
-            Opt-Ini 'Wifi Sense'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworksettings' 'AutoConnectAllowedOEM' 'REG_DWORD' '0'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowWiFiHotSpotReporting' 'Value' 'REG_DWORD' '0'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowAutoConnectToWiFiSenseHotspots' 'Value' 'REG_DWORD' '0'
-            Opt-Fin 'Wifi Sense apagado'
-        }
-        R = {
-            Opt-Ini 'Wifi Sense (restaurar)'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworksettings' 'AutoConnectAllowedOEM' 'REG_DWORD' '1'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowWiFiHotSpotReporting' 'Value' 'REG_DWORD' '1'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowAutoConnectToWiFiSenseHotspots' 'Value' 'REG_DWORD' '1'
-            Opt-Fin 'Wifi Sense restaurado'
         }
     },
     @{
@@ -4098,29 +3995,6 @@ $ListaOpciones = @(
         }
     },
     @{
-        Id = 'pvl'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
-        Q = '- Desea apagar el DRM en linea de Windows Media? (Y bloquear el Grupo Hogar, que Windows 10 y 11 ya no traen)'
-        Hace = 'no deja que el Windows Media Player viejo busque en internet las licencias de musica y video protegidos, y bloquea el Grupo Hogar (una funcion vieja que Windows 10 y 11 ya no traen; se bloquea por si quedo algo).'
-        Favor = 'menos conexiones en segundo plano de funciones viejas.'
-        Contra = 'la musica o los videos viejos con proteccion (DRM) pueden no reproducirse en el Media Player viejo.'
-        S = {
-            Opt-Ini 'DRM en linea y Grupo Hogar'
-            Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\WMDRM' 'DisableOnline' 'REG_DWORD' '1'
-            Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Windows\HomeGroup' 'DisableHomeGroup' 'REG_DWORD' '1'
-            Svc 'HomeGroupListener' 'disabled' '4'
-            Svc 'HomeGroupProvider' 'disabled' '4'
-            Opt-Fin 'DRM en linea y Grupo Hogar apagados'
-        }
-        R = {
-            Opt-Ini 'DRM en linea y Grupo Hogar (restaurar)'
-            Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\WMDRM' 'DisableOnline'
-            Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Windows\HomeGroup' 'DisableHomeGroup'
-            Svc 'HomeGroupListener' 'demand' '3'
-            Svc 'HomeGroupProvider' 'demand' '3'
-            Opt-Fin 'DRM en linea y Grupo Hogar restaurados'
-        }
-    },
-    @{
         Id = 'ter'; Seccion = 'SERVICIOS Y FUNCIONES QUE CASI NADIE USA'
         Q = '- Desea desactivar Teredo? (Tunel IPv6 que puede sumar latencia; puede afectar el chat de Xbox en PC)'
         Hace = 'apaga Teredo, un tunel de IPv6 que Windows usa por encima de IPv4.'
@@ -4142,7 +4016,7 @@ $ListaOpciones = @(
         }
     },
     @{
-        # v1.0.13: "Telemetria de programas" se dividio en tp (Office), tpn (NVIDIA) y tps (PowerShell 7)
+        # v1.0.13: "Telemetria de programas" se dividio en tp (Office), tpn (NVIDIA) y tps (PowerShell 7). Despues tpn se junto con nvl en nvx.
         Id = 'tp'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
         Q = '- Desea apagar la telemetria de Office? (Si no tenes Office no cambia nada)'
         Hace = 'apaga la telemetria y los comentarios de Office y sus tareas de envio de datos.'
@@ -4170,40 +4044,6 @@ $ListaOpciones = @(
         }
     },
     @{
-        Id = 'tpn'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
-        Q = '- Desea apagar la telemetria de NVIDIA? (Si no tenes placa NVIDIA no cambia nada)'
-        Hace = 'apaga el servicio de telemetria de NVIDIA, sus tareas de envio de datos y la recoleccion de datos del driver y del Panel de control.'
-        Favor = 'menos datos enviados y menos tareas de fondo.'
-        Contra = 'ninguno en el uso normal.'
-        S = {
-            Opt-Ini 'Telemetria de NVIDIA'
-            Svc 'NvTelemetryContainer' 'disabled' '4'
-            Svc-Parar 'NvTelemetryContainer'
-            if (Test-Path -LiteralPath 'HKLM:\SOFTWARE\NVIDIA Corporation') {
-                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID44231' 'REG_DWORD' '0'
-                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID64640' 'REG_DWORD' '0'
-                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID66610' 'REG_DWORD' '0'
-                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\NvControlPanel2\Client' 'OptInOrOutPreference' 'REG_DWORD' '0'
-            }
-            Tarea '\NvTmMon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'disable'
-            Tarea '\NvTmRep_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'disable'
-            Tarea '\NvTmRepOnLogon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'disable'
-            Opt-Fin 'Telemetria de NVIDIA desactivada'
-        }
-        R = {
-            Opt-Ini 'Telemetria de NVIDIA (restaurar)'
-            Svc 'NvTelemetryContainer' 'auto' '2'
-            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID44231'
-            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID64640'
-            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID66610'
-            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\NvControlPanel2\Client' 'OptInOrOutPreference'
-            Tarea '\NvTmMon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'enable'
-            Tarea '\NvTmRep_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'enable'
-            Tarea '\NvTmRepOnLogon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'enable'
-            Opt-Fin 'Telemetria de NVIDIA restaurada'
-        }
-    },
-    @{
         Id = 'tps'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
         Q = '- Desea apagar la telemetria de PowerShell 7? (Si no lo tenes instalado no cambia nada)'
         Hace = 'le pide a PowerShell 7 que no mande datos de uso a Microsoft (variable POWERSHELL_TELEMETRY_OPTOUT).'
@@ -4221,45 +4061,30 @@ $ListaOpciones = @(
         }
     },
     @{
+        # Solo restaurar: Brio ya no toca el archivo hosts. Queda para quien lo aplico con una version vieja
+        # (Herramientas > Quitar el bloqueo de telemetria viejo, y Actualizar Windows lo quita antes de actualizar).
         Id = 'hst'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
-        Q = '- Desea bloquear los servidores de telemetria de Microsoft? (38 entradas en el archivo hosts; Update y Store no se tocan)'
-        Hace = 'anota 38 servidores de telemetria en el archivo hosts para que no respondan.'
-        Favor = 'corta envios de datos aunque Windows reactive algo despues.'
-        Contra = 'Defender a veces avisa por cambios en hosts y algun diagnostico de Microsoft puede fallar.'
-        S = {
-            Opt-Ini 'Bloqueo de servidores de telemetria'
-            $h = Join-Path $env:SystemRoot 'System32\drivers\etc\hosts'
-            if (Hosts-Tiene $h) {
-                $script:OptS++
-                Log 'OK' 'el bloqueo de telemetria ya estaba en el archivo hosts'
-                Opt-Fin 'Servidores de telemetria bloqueados en hosts'
-                return
-            }
-            if (-not (Test-Path -LiteralPath ($h + '.xuca.bak'))) { Copy-Item -LiteralPath $h -Destination ($h + '.xuca.bak') -Force -ErrorAction SilentlyContinue }
-            $txt = "`r`n" + (($HostsTelemetria | ForEach-Object { '0.0.0.0 ' + $_ + ' # xuca-telemetria' }) -join "`r`n") + "`r`n"
-            try { [IO.File]::AppendAllText($h, $txt, [Text.Encoding]::Default) } catch { }
-            Res (Hosts-Tiene $h) 'hosts: bloqueo de telemetria'
-            & ipconfig.exe /flushdns 2>&1 | Out-Null
-            Say '  Si Defender avisa por el archivo hosts, es por estas entradas. Dejalo pasar o usa R para quitarlas.' 'Yellow'
-            Opt-Fin 'Servidores de telemetria bloqueados en hosts'
-        }
+        Q = '- Desea quitar las lineas de telemetria que una version vieja de Brio agrego al archivo hosts?'
+        Hace = 'saca del archivo hosts solo las lineas que agrego una version vieja de Brio y deja el resto como estaba.'
+        Saltar = { (Respuesta 'hst') -ne 'R' }
         R = {
-            Opt-Ini 'Bloqueo de servidores de telemetria (restaurar)'
+            Opt-Ini 'Bloqueo de telemetria de una version vieja (quitar)'
             $h = Join-Path $env:SystemRoot 'System32\drivers\etc\hosts'
             if (-not (Hosts-Tiene $h)) {
                 $script:OptS++
-                Log 'OK' 'no habia entradas de telemetria en hosts'
-                Opt-Fin 'Archivo hosts limpio de entradas de telemetria'
+                Log 'OK' 'no habia lineas de Brio en el archivo hosts'
+                Opt-Fin 'Archivo hosts sin lineas de Brio'
                 return
             }
-            try {
-                $l = @([IO.File]::ReadAllLines($h, [Text.Encoding]::Default) | Where-Object { -not $_.Contains('# xuca-telemetria') })
-                [IO.File]::WriteAllLines($h, [string[]]$l, [Text.Encoding]::Default)
-            } catch { }
-            if (Hosts-Tiene $h) { $script:OptT++; $script:OptF++; Log 'FALLO' 'no se pudieron quitar las entradas de hosts' }
-            else { $script:OptT++; Log 'OK' 'entradas de telemetria quitadas de hosts' }
+            try { [IO.File]::WriteAllLines($h, [string[]](Hosts-SinBrio ([IO.File]::ReadAllLines($h, [Text.Encoding]::Default))), [Text.Encoding]::Default) } catch { }
+            if (Hosts-Tiene $h) { $script:OptT++; $script:OptF++; Log 'FALLO' ('no se pudieron quitar las lineas de Brio del archivo hosts' + (Causa-Error)) }
+            else {
+                $script:OptT++; Log 'OK' 'lineas de Brio quitadas del archivo hosts'
+                # La copia que hacia la version vieja ya no hace falta: el archivo quedo como estaba antes
+                Remove-Item -LiteralPath ($h + '.xuca.bak') -Force -ErrorAction SilentlyContinue
+            }
             & ipconfig.exe /flushdns 2>&1 | Out-Null
-            Opt-Fin 'Archivo hosts limpio de entradas de telemetria'
+            Opt-Fin 'Archivo hosts sin lineas de Brio'
         }
     },
     @{
@@ -4599,7 +4424,7 @@ $ListaOpciones = @(
 # Lo que llama la app (en otro hilo, con Comun.ps1 cargado). $salida = archivo donde la app lee el progreso.
 function Correr-Debloat([string]$salida, [string]$carpeta) {
     $script:RpApagado = $false; $script:ModoCuenta = $false
-    Correr-Opciones -Nombre 'debloat' -Titulo 'WINDOWS DEBLOAT' -Lista @($ListaOpciones | Where-Object { $_.Id -ne 'cta' }) -Rein $ReinDebloat -Win10 $SoloWin10 -Salida $salida -Carpeta $carpeta
+    Correr-Opciones -Nombre 'debloat' -Titulo 'WINDOWS DEBLOAT' -Lista @($ListaOpciones | Where-Object { $_.Id -ne 'cta' }) -Rein $ReinDebloat -Salida $salida -Carpeta $carpeta
 }
 
 # Ventana de PowerShell a la vista, para lo que te pide datos:
@@ -4611,7 +4436,7 @@ function Correr-DebloatConsola([string]$modo, [string]$carpeta) {
     $script:ModoCuenta = ($modo -eq 'cta')
     try { $Host.UI.RawUI.WindowTitle = ('Br' + [string][char]0xED + 'o') } catch { }
     $ids = $(if ($script:ModoCuenta) { @('cta') } else { @('rp', 'ver', 'ms_acc', 'al') })
-    Correr-Opciones -Nombre 'debloat' -Titulo 'WINDOWS DEBLOAT' -Lista @($ListaOpciones | Where-Object { $ids -contains $_.Id }) -Rein $ReinDebloat -Win10 $SoloWin10 -Salida '' -Carpeta $carpeta
+    Correr-Opciones -Nombre 'debloat' -Titulo 'WINDOWS DEBLOAT' -Lista @($ListaOpciones | Where-Object { $ids -contains $_.Id }) -Rein $ReinDebloat -Salida '' -Carpeta $carpeta
     if ($script:ModoCuenta -and $script:Reinicio) {
         Write-Host ''
         if ((Read-Host 'Desea reiniciar ahora? [S] Si  [N] No') -match '^[sS]') {
