@@ -393,9 +393,6 @@ en: of
 es: Ya no vas a poder volver atras con un punto de restauracion.
 en: You won't be able to go back with a restore point anymore.
 
-es: Si la Proteccion contra alteraciones sigue encendida, falla. Smart App Control no vuelve sin reinstalar Windows. Si cambia algo, borra Riot Vanguard y cierra Riot (lo reinstalas abriendo el cliente de Riot). REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.
-en: If Tamper Protection is still on, it fails. Smart App Control doesn't come back without reinstalling Windows. If it changes anything, it deletes Riot Vanguard and closes Riot (you reinstall it by opening the Riot client). RESTART THE PC WITHOUT FAIL before reinstalling Vanguard (or opening VALORANT or LoL): if you install it without restarting, errors and install loops can happen.
-
 es: Descifrar el disco puede tardar bastante en segundo plano. Si cambia algo, borra Riot Vanguard. REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.
 en: Decrypting the disk can take quite a while in the background. If it changes anything, it deletes Riot Vanguard. RESTART THE PC WITHOUT FAIL before reinstalling Vanguard (or opening VALORANT or LoL): if you install it without restarting, errors and install loops can happen.
 
@@ -611,18 +608,6 @@ en: you go straight into Windows.
 es: cualquiera que prenda la PC entra, y no anda el Escritorio remoto.
 en: anyone who turns on the PC gets in, and Remote Desktop doesn't work.
 
-es: Activacion de Windows
-en: Windows activation
-
-es: Activar Windows
-en: Activate Windows
-
-es: Se abre PowerShell y corre el comando oficial de Massgrave:
-en: PowerShell opens and runs the official Massgrave command:
-
-es: ejecuta el comando oficial de Massgrave para activar Windows de manera segura.
-en: runs the official Massgrave command to activate Windows safely.
-
 es: "Ya tenes la 26H2 o una build mas nueva (build "
 en: "You already have 26H2 or a newer build (build "
 
@@ -719,8 +704,8 @@ en: Windows as light as possible: all the debloat and system optimization, and i
 es: una PC justa o vieja que necesita todo el rendimiento del sistema, sabiendo lo que haces.
 en: a weak or old PC that needs all the system performance, knowing what you're doing.
 
-es: la PC queda sin antivirus. Borra Riot Vanguard y cierra Riot (lo reinstalas abriendo el cliente de Riot), y deja de andar WSL, Docker y las maquinas virtuales. REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.
-en: the PC is left without antivirus. It deletes Riot Vanguard and closes Riot (you reinstall it by opening the Riot client), and WSL, Docker and virtual machines stop working. RESTART THE PC WITHOUT FAIL before reinstalling Vanguard (or opening VALORANT or LoL): if you install it without restarting, errors and install loops can happen.
+es: borra Riot Vanguard y cierra Riot (lo reinstalas abriendo el cliente de Riot), y deja de andar WSL, Docker y las maquinas virtuales. REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.
+en: it deletes Riot Vanguard and closes Riot (you reinstall it by opening the Riot client), and WSL, Docker and virtual machines stop working. RESTART THE PC WITHOUT FAIL before reinstalling Vanguard (or opening VALORANT or LoL): if you install it without restarting, errors and install loops can happen.
 
 es: todo, todo: cada opcion de Debloat y de Gaming. Es Full Optimizado mas todos los ajustes competitivos (mouse, prioridad y afinidad para tus juegos, plan Alto rendimiento, Modo Nitro, temporizador al minimo, red, DNS y notificaciones).
 en: everything, everything: every Debloat and Gaming option. It's Full Optimized plus all the competitive tweaks (mouse, priority and affinity for your games, High performance plan, Nitro Mode, timer at minimum, network, DNS and notifications).
@@ -731,11 +716,8 @@ en: a PC that's only for gaming, where you want the absolute maximum and know wh
 es: suma los riesgos de Full Optimizado y de Competitivo: sin antivirus, Vanguard se borra (lo reinstalas abriendo el cliente de Riot), y con undervolt u overclock la PC puede colgarse por el plan de energia y el temporizador.
 en: adds up the risks of Full Optimized and Competitive: no antivirus, Vanguard gets deleted (you reinstall it by opening the Riot client), and with undervolt or overclock the PC can freeze because of the power plan and the timer.
 
-es: Tiene la alerta porque apaga el antivirus (Defender, SmartScreen y Smart App Control): la PC queda sin proteccion contra virus.
-en: It has the warning because it turns off the antivirus (Defender, SmartScreen and Smart App Control): the PC is left without virus protection.
-
-es: Tambien apaga BitLocker, la integridad de memoria y VBS, y desinstala Riot Vanguard (lo reinstalas abriendo el cliente de Riot).
-en: It also turns off BitLocker, memory integrity and VBS, and uninstalls Riot Vanguard (you reinstall it by opening the Riot client).
+es: Tiene la alerta porque apaga BitLocker, la integridad de memoria y VBS, y desinstala Riot Vanguard (lo reinstalas abriendo el cliente de Riot).
+en: It has the warning because it turns off BitLocker, memory integrity and VBS, and uninstalls Riot Vanguard (you reinstall it by opening the Riot client).
 
 es: Tiene la alerta por los ajustes del procesador: plan Alto rendimiento, Modo Nitro, Baja latencia y temporizador al minimo suben el consumo y el calor, y con undervolt u overclock la PC puede colgarse.
 en: It has the warning because of the processor tweaks: High performance plan, Nitro Mode, Low latency and the minimum timer raise power use and heat, and with undervolt or overclock the PC can freeze.
@@ -884,12 +866,6 @@ en: You didn't select any option.
 es: No elegiste ningun juego. Elegi al menos uno o desmarca "Prioridad alta" y "Afinidad".
 en: You didn't choose any game. Choose at least one or unselect "High priority" and "Affinity".
 
-es: Para apagar el antivirus del todo, primero apaga vos la "Proteccion contra alteraciones" (Windows no deja que un programa la apague).
-en: To turn off the antivirus completely, first turn off "Tamper Protection" yourself (Windows doesn't let a program turn it off).
-
-es: Se abrio Seguridad de Windows. Apagala y despues toca Listo.
-en: Windows Security opened. Turn it off and then press Done.
-
 es: No marcaste ninguna opcion. Marca las que quieras volver a como vienen en Windows (con "Marcar todo" en Debloat y en Gaming restableces todo).
 en: You didn't select any option. Select the ones you want to return to how they come in Windows (with "Select all" in Debloat and Gaming you reset everything).
 
@@ -904,9 +880,6 @@ en: "Resetting "
 
 es: " opciones a como vienen en Windows."
 en: " options to how they come in Windows."
-
-es: El antivirus vuelve, pero la Proteccion contra alteraciones la encendes vos y Smart App Control no vuelve sin reinstalar Windows.
-en: The antivirus comes back, but you turn Tamper Protection on yourself and Smart App Control doesn't come back without reinstalling Windows.
 
 es: BitLocker solo deja de estar bloqueado: no vuelve a cifrar el disco.
 en: BitLocker just stops being blocked: it doesn't encrypt the disk again.
@@ -2908,9 +2881,6 @@ en: Disabling hibernation turns on memory compression, which needs SysMain turne
 es: Una crea un punto de restauracion y la otra apaga y borra todos.
 en: One creates a restore point and the other turns them off and deletes them all.
 
-es: Una apaga Defender del todo y la otra solo le baja el uso de CPU: con Defender apagado no sirve de nada.
-en: One turns Defender off completely and the other only lowers its CPU use: with Defender off it does nothing.
-
 es: Cual queres dejar marcada?
 en: Which one do you want to keep selected?
 
@@ -2988,8 +2958,8 @@ en: One prioritizes battery and the other sets the Windows clock to 0.5 ms, whic
 es: Una prioriza la bateria y la otra usa el plan Alto rendimiento: objetivos opuestos.
 en: One prioritizes battery and the other uses the High performance plan: opposite goals.
 
-es: Este perfil apaga el antivirus y BitLocker. La PC queda sin proteccion contra virus.
-en: This profile turns off the antivirus and BitLocker. The PC is left without virus protection.
+es: Este perfil apaga BitLocker: si te roban la PC, pueden leer tus archivos.
+en: This profile turns off BitLocker: if your PC is stolen, they can read your files.
 
 es: lo que mas FPS da por cada grado de mas, sin tocar la seguridad: mouse sin aceleracion, afinidad para tus juegos, temporizador al minimo, efectos visuales en rendimiento, sin grabacion de juegos ni Game Bar, DNS mas rapido, sin notificaciones en partida y sin programas de mas al arrancar (OneDrive y el icono de Defender incluidos). No incluye lo que puede molestar al stream (prioridad alta, limpieza de RAM, GPU por hardware); si haces stream con OBS o TikTok LIVE Studio, usa NVENC o AMF. Antes de borrar la Game Bar la app te pregunta.
 en: what gives the most FPS for every extra degree, without touching security: mouse without acceleration, affinity for your games, timer at the minimum, visual effects on performance, no game recording or Game Bar, faster DNS, no notifications in game and no extra programs at startup (OneDrive and the Defender icon included). It does not include what can bother streaming (high priority, RAM cleaning, hardware GPU); if you stream with OBS or TikTok LIVE Studio, use NVENC or AMF. The app asks you before deleting the Game Bar.
@@ -3021,8 +2991,8 @@ en: If the disk was encrypted with BitLocker, the PC is slower until decryption 
 es: Sin Panel de control de NVIDIA hasta restablecer la opcion de NVIDIA.
 en: No NVIDIA Control Panel until you restore the NVIDIA option.
 
-es: Este perfil es EXTREMO y va a apagar o quitar: el antivirus, BitLocker, la integridad de memoria y VBS, Windows Update, la Microsoft Store, Bluetooth, los componentes viejos de Windows y servicios de usuario y de red local (impresion, compartir y Escritorio remoto). La PC queda sin proteccion contra virus ni parches de seguridad, y dejan de andar WSL, Docker y las maquinas virtuales. Casi todo se restablece desde la app; borrar apps (Store y apps basura) no tiene vuelta atras. Si tu antivirus avisa de algun cambio, no lo desactives por tu cuenta: la app te guia.
-en: This profile is EXTREME and will turn off or remove: the antivirus, BitLocker, memory integrity and VBS, Windows Update, the Microsoft Store, Bluetooth, the legacy Windows components and user and local network services (printing, sharing and Remote Desktop). The PC is left without virus protection or security patches, and WSL, Docker and virtual machines stop working. Almost everything is restored from the app; deleting apps (Store and bloatware) cannot be undone. If your antivirus warns about a change, do not turn it off on your own: the app guides you.
+es: Este perfil es EXTREMO y va a apagar o quitar: BitLocker, la integridad de memoria y VBS, Windows Update, la Microsoft Store, Bluetooth, los componentes viejos de Windows y servicios de usuario y de red local (impresion, compartir y Escritorio remoto). La PC queda sin parches de seguridad, y dejan de andar WSL, Docker y las maquinas virtuales. Casi todo se restablece desde la app; borrar apps (Store y apps basura) no tiene vuelta atras.
+en: This profile is EXTREME and will turn off or remove: BitLocker, memory integrity and VBS, Windows Update, the Microsoft Store, Bluetooth, the legacy Windows components and user and local network services (printing, sharing and Remote Desktop). The PC is left without security patches, and WSL, Docker and virtual machines stop working. Almost everything is restored from the app; deleting apps (Store and bloatware) cannot be undone.
 
 es: "No hace falta: tu Windows no tiene el servicio "
 en: "Not needed: your Windows does not have the service "
@@ -3540,24 +3510,6 @@ es: El tiempo
 en: Weather
 es: Outlook (nuevo)
 en: Outlook (new)
-es: Antivirus: falta un paso tuyo
-en: Antivirus: one step is up to you
-es: Para apagar el antivirus, primero apaga vos la "Proteccion contra alteraciones" (Windows no deja que un programa la apague).
-en: To turn off the antivirus, first turn off "Tamper Protection" yourself (Windows does not let a program turn it off).
-es: 1. Se abrio Seguridad de Windows, en Configuracion de antivirus y proteccion contra amenazas.
-en: 1. Windows Security opened, in Virus & threat protection settings.
-es: 2. Apaga "Proteccion contra alteraciones" y acepta el cartel de Windows.
-en: 2. Turn off "Tamper Protection" and accept the Windows prompt.
-es: 3. Volve aca y toca "Ya la apague".
-en: 3. Come back here and tap "I turned it off".
-es: Mientras tanto la app espera: todavia no se aplico nada.
-en: Meanwhile the app waits: nothing has been applied yet.
-es: Ya la apague
-en: I turned it off
-es: Sigue encendida
-en: Still on
-es: La Proteccion contra alteraciones todavia esta encendida. Se vuelve a abrir Seguridad de Windows para que la apagues.
-en: Tamper Protection is still on. Windows Security opens again so you can turn it off.
 es: Se desmarcaron estas opciones porque chocan con otras que marcaste:
 en: These options were unchecked because they clash with others you checked:
 es: Opcion nueva:
@@ -3717,8 +3669,8 @@ en: Nitro Mode, the High performance plan and Low latency are left out on purpos
 es: el antivirus (ni sus analisis), BitLocker, la integridad de memoria ni VBS, ni el plan de energia ni el procesador (nada de Alto rendimiento, Modo Nitro ni Baja latencia); tampoco borra apps.
 en: the antivirus (or its scans), BitLocker, memory integrity or VBS, or the power plan or the processor (no High performance, Nitro Mode or Low latency); it does not delete apps either.
 
-es: Windows lo mas liviano posible: todo el debloat y la optimizacion del sistema, y ademas apaga el antivirus y BitLocker, bloquea la telemetria en hosts y apaga Teredo y Windows Search. No toca la integridad de memoria ni VBS.
-en: Windows as light as possible: all of the debloat and system optimization, and it also turns off the antivirus and BitLocker, blocks telemetry in hosts and turns off Teredo and Windows Search. It does not touch memory integrity or VBS.
+es: Windows lo mas liviano posible: todo el debloat y la optimizacion del sistema, y ademas apaga BitLocker, bloquea la telemetria en hosts y apaga Teredo y Windows Search. No toca la integridad de memoria ni VBS.
+en: Windows as light as possible: all of the debloat and system optimization, and it also turns off BitLocker, blocks telemetry in hosts and turns off Teredo and Windows Search. It does not touch memory integrity or VBS.
 
 es: la integridad de memoria ni VBS, los ajustes de juego competitivo (mouse, prioridad, afinidad, plan de energia, temporizador y red), ni Edge ni Chrome. Crea un punto de restauracion antes de empezar.
 en: memory integrity or VBS, the competitive gaming tweaks (mouse, priority, affinity, power plan, timer and network), or Edge or Chrome. It creates a restore point before starting.
@@ -3732,11 +3684,11 @@ en: the antivirus (or its scans), memory integrity or VBS. It does not set the H
 es: 2,5 a 3,5 GB de RAM y 0 a 2 % de CPU, sin nada abierto en Windows 11 (estimado, no medido; depende del hardware y los drivers).
 en: 2.5 to 3.5 GB of RAM and 0 to 2% of CPU, with nothing open, on Windows 11 (estimated, not measured; it depends on the hardware and drivers).
 
-es: la PC queda sin antivirus, sin parches de seguridad (Windows Update apagado), sin Store ni Bluetooth, y dejan de andar WSL, Docker y las maquinas virtuales. Si el disco estaba cifrado con BitLocker, la PC va mas lenta hasta que termine de descifrarse. Para pasar de ahi hace falta una ISO recortada (tiny11 o NTLite): desde una Windows instalada no se llega a 0,5 GB.
-en: the PC is left with no antivirus, no security patches (Windows Update off), no Store or Bluetooth, and WSL, Docker and virtual machines stop working. If the disk was encrypted with BitLocker, the PC is slower until it finishes decrypting. To go lower than this you need a trimmed ISO (tiny11 or NTLite): from an installed Windows you will not reach 0.5 GB.
+es: la PC queda sin parches de seguridad (Windows Update apagado), sin Store ni Bluetooth, y dejan de andar WSL, Docker y las maquinas virtuales. Si el disco estaba cifrado con BitLocker, la PC va mas lenta hasta que termine de descifrarse. Para pasar de ahi hace falta una ISO recortada (tiny11 o NTLite): desde una Windows instalada no se llega a 0,5 GB.
+en: the PC is left with no security patches (Windows Update off), no Store or Bluetooth, and WSL, Docker and virtual machines stop working. If the disk was encrypted with BitLocker, the PC is slower until it finishes decrypting. To go lower than this you need a trimmed ISO (tiny11 or NTLite): from an installed Windows you will not reach 0.5 GB.
 
-es: lo mas cerca de un Windows recortado sin reinstalar: todo lo de RAM liviana y ademas apaga la hibernacion, el antivirus y BitLocker, Windows Update (y sus drivers), Bluetooth, la Store y el Centro de seguridad, quita la Microsoft Store y los componentes viejos (Internet Explorer, WordPad, SMBv1, PowerShell 2), baja los servicios de usuario y de red local, la grabacion de juegos y el NVIDIA extra, y desactiva la integridad de memoria y VBS.
-en: the closest to a trimmed Windows without reinstalling: everything in Light RAM, and it also turns off hibernation, the antivirus and BitLocker, Windows Update (and its drivers), Bluetooth, the Store and the Security Center, removes the Microsoft Store and old components (Internet Explorer, WordPad, SMBv1, PowerShell 2), lowers user and local network services, game recording and the extra NVIDIA software, and turns off memory integrity and VBS.
+es: lo mas cerca de un Windows recortado sin reinstalar: todo lo de RAM liviana y ademas apaga la hibernacion, BitLocker, Windows Update (y sus drivers), Bluetooth, la Store y el Centro de seguridad, quita la Microsoft Store y los componentes viejos (Internet Explorer, WordPad, SMBv1, PowerShell 2), baja los servicios de usuario y de red local, la grabacion de juegos y el NVIDIA extra, y desactiva la integridad de memoria y VBS.
+en: the closest to a trimmed Windows without reinstalling: everything in Light RAM, and it also turns off hibernation, BitLocker, Windows Update (and its drivers), Bluetooth, the Store and the Security Center, removes the Microsoft Store and old components (Internet Explorer, WordPad, SMBv1, PowerShell 2), lowers user and local network services, game recording and the extra NVIDIA software, and turns off memory integrity and VBS.
 
 es: una PC vieja o con poca RAM que solo tiene que abrir uno o dos programas con el menor consumo posible, sabiendo lo que haces.
 en: an old PC or one with little RAM that only has to open one or two programs with the lowest possible use, knowing what you are doing.
@@ -4313,11 +4265,6 @@ en: Your OneDrive folders were not moved because there is not enough free space 
 es: No se movieron tus carpetas de OneDrive porque hay archivos con rutas demasiado largas. Acortales el nombre o la ruta y volve a elegir OneDrive. OneDrive queda instalado.
 en: Your OneDrive folders were not moved because some files have paths that are too long. Shorten their name or path and choose OneDrive again. OneDrive stays installed.
 
-es: El antivirus SIGUE ENCENDIDO: Windows no dejo apagarlo, casi seguro porque la Proteccion contra alteraciones esta encendida. Apagala en Seguridad de Windows > Proteccion antivirus y contra amenazas > Configuracion de antivirus y proteccion contra amenazas > Proteccion contra alteraciones, y volve a aplicar.
-en: The antivirus is STILL ON: Windows did not let it be turned off, almost certainly because Tamper Protection is on. Turn it off in Windows Security > Virus & threat protection > Virus & threat protection settings > Tamper Protection, and apply again.
-
-es: No pude comprobar si la Proteccion contra alteraciones esta encendida. Por las dudas, apagala vos antes de seguir.
-en: I could not check whether Tamper Protection is on. To be safe, turn it off yourself before continuing.
 es: Dejarlo
 en: Keep it
 es: Sacarlo
@@ -4553,3 +4500,27 @@ en: "Still pending (the reason is in the log): "
 
 es: Termino, pero algo quedo pendiente.
 en: Finished, but something is still pending.
+
+es: Restaurar el antivirus
+en: Restore the antivirus
+
+es: Restaurar el antivirus de Windows
+en: Restore the Windows antivirus
+
+es: Restaurando el antivirus
+en: Restoring the antivirus
+
+es: Vuelve a encender Defender y SmartScreen como vienen en Windows y quita las politicas que los apagaban.
+en: Turns Defender and SmartScreen back on the way Windows ships them and removes the policies that turned them off.
+
+es: La Proteccion contra alteraciones la encendes vos en Seguridad de Windows. Seguir?
+en: You turn Tamper Protection back on yourself in Windows Security. Continue?
+
+es: vuelve a encender Defender y SmartScreen si los apagaste con una version vieja de Brio.
+en: turns Defender and SmartScreen back on if you turned them off with an old version of Brio.
+
+es: la PC vuelve a estar protegida contra virus.
+en: the PC is protected against viruses again.
+
+es: Smart App Control no vuelve sin reinstalar Windows.
+en: Smart App Control doesn't come back without reinstalling Windows.

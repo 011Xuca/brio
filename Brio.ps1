@@ -22,6 +22,9 @@ if (-not $yo.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     try { Start-Process -FilePath 'powershell.exe' -Verb RunAs -WindowStyle Hidden -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $PSCommandPath + '"') } catch { }
     exit
 }
+# Politica solo para este proceso (no toca la PC): la heredan los powershell.exe que abre la app (reabrirse, herramientas),
+# asi no hace falta pasarles -ExecutionPolicy Bypass. Si una directiva de grupo la fija, manda la directiva (igual que con el parametro).
+try { Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force -ErrorAction Stop } catch { }
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 
@@ -334,7 +337,8 @@ foreach ($r in $Rutas.Values) {
 }
 
 # Opciones que te piden datos en la consola: van en la pagina Herramientas, no como casillas.
-$SoloScript = @('ver', 'rep', 'ms_acc', 'al', 'cta', 'drv', 'rp')
+# 'av' solo restaura el antivirus que apagaban las versiones viejas (boton en Herramientas).
+$SoloScript = @('ver', 'rep', 'ms_acc', 'al', 'cta', 'drv', 'rp', 'av')
 
 # "- Desea mouse competitivo? (Sin aceleracion...)" -> "Mouse competitivo"
 function Titulo-Corto([string]$q) {
@@ -347,7 +351,7 @@ function Titulo-Corto([string]$q) {
 # El ingles de cada uno esta en lang\en-en\opciones.txt (Titulo), por el Id.
 $TitulosCortos = @{
     'Debloat|ini' = 'Limpiar arranque'; 'Debloat|db' = 'Apps del Sistema'; 'Debloat|eb' = 'Reducir bloat del navegador'; 'Debloat|rsv' = 'Servicios del Sistema'
-    'Debloat|sv' = 'Quitar funciones viejas'; 'Debloat|av' = 'Apagar el antivirus'; 'Debloat|apps' = 'Bloquear apps en segundo plano'
+    'Debloat|sv' = 'Quitar funciones viejas'; 'Debloat|apps' = 'Bloquear apps en segundo plano'
     'Debloat|tel' = 'Reducir la telemetria'
     'Debloat|ofb' = 'Apagar la precarga de Office'; 'Debloat|do' = 'No compartir actualizaciones'; 'Debloat|wud' = 'Sin drivers por Windows Update'
     'Debloat|wup' = 'Pausar actualizaciones por mas tiempo'; 'Debloat|wus' = 'Apagar Windows Update'; 'Debloat|str' = 'Apagar instalaciones de la Store'
@@ -370,7 +374,7 @@ $TitulosCortos = @{
 }
 # Favoritas de la comunidad: llevan una estrella y el nombre con el que se las conoce
 $Favoritas = @{
-    'Gaming|cpu' = 'aka QuickCPU'; 'Gaming|tr' = 'aka TimerResolution'; 'Debloat|av' = 'aka apagar Defender'
+    'Gaming|cpu' = 'aka QuickCPU'; 'Gaming|tr' = 'aka TimerResolution'
     'Gaming|mi' = 'aka Core Isolation / HVCI'; 'Gaming|vbs' = 'aka Virtualization-Based Security'
 }
 $Estrella = [string][char]0x2B50
@@ -733,11 +737,6 @@ function Resumen-De([string]$cat, $actual, [string]$etiqueta) {
 # ------------------------------------------------------------
 $Chequeos = @{
     'Debloat|rpo'   = { (Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\SystemRestore' 'DisableSR') -eq 1 }
-    'Debloat|av'    = {
-        $svc = Get-Service -Name WinDefend -ErrorAction SilentlyContinue
-        if ((-not $svc) -or ($svc.Status -ne 'Running')) { return $true }
-        ((Get-MpComputerStatus -ErrorAction Stop).RealTimeProtectionEnabled -eq $false) -and ((Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' 'EnableSmartScreen') -eq 0)
-    }
     'Debloat|bl'    = { (Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker' 'PreventDeviceEncryption') -eq 1 }
     'Debloat|hib'   = { (Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Power' 'HibernateEnabled') -eq 0 }
     'Debloat|rc'    = { (Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI' 'DisableAIDataAnalysis') -eq 1 }
@@ -2644,7 +2643,6 @@ $Advertencias = @{
     'Debloat|tsk'  = 'Puede impedir actualizar a Windows 11 26H2: apaga las tareas de diagnostico, inventario de dispositivos y configuracion de funciones (Flighting) que Windows usa para ofrecer la version nueva. Restablecelo antes de actualizar.'
     'Debloat|wup'  = 'Mientras tengas las actualizaciones en pausa no llega Windows 11 26H2.'
     'Debloat|rpo'  = 'Ya no vas a poder volver atras con un punto de restauracion.'
-    'Debloat|av'   = 'Si la Proteccion contra alteraciones sigue encendida, falla. Smart App Control no vuelve sin reinstalar Windows. Si cambia algo, borra Riot Vanguard y cierra Riot (lo reinstalas abriendo el cliente de Riot). REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.'
     'Debloat|bl'   = 'Descifrar el disco puede tardar bastante en segundo plano. Si cambia algo, borra Riot Vanguard. REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.'
     'Debloat|db'   = 'No tiene restablecimiento las apps borradas se reinstalan a mano desde la Store.'
     'Debloat|edge' = 'Si no tenes otro navegador, te quedas sin uno. Una actualizacion grande de Windows puede traerlo de vuelta.'
@@ -3052,7 +3050,7 @@ $OrdenSec = @{
         @('ALMACENAMIENTO Y MEMORIA', '#60A5FA'),                    # 1: RAM y disco
         @('ACTUALIZACIONES Y STORE', '#60A5FA'),                     # 1: descargas y reinicios en segundo plano
         @('SERVICIOS Y FUNCIONES QUE CASI NADIE USA', '#60A5FA'),    # 1: poca RAM cada uno; los extremos van al final
-        @('SEGURIDAD', '#60A5FA'),                                   # 1 con riesgo: el antivirus pesa, pero la PC queda sin proteccion
+        @('SEGURIDAD', '#60A5FA'),                                   # 1 con riesgo: BitLocker
         @('APPS, NAVEGADORES E IA', '#60A5FA'),                      # 1-3: apps basura, navegadores e IA
         @('PRIVACIDAD Y TELEMETRIA', '#9AA0A6'),                     # 3
         @('INTERFAZ Y COMODIDAD', '#9AA0A6'),                        # 3
@@ -3090,7 +3088,7 @@ $OrdenOpc = @{
         # Servicios y funciones: lo comun y seguro primero, los extremos al final
         'sv', 'rsv', 'old', 'xbs', 'rmin', 'bt', 'leg', 'apl', 'ter', 'usv', 'cdps', 'tkb', 'tim',
         # Seguridad
-        'av', 'bl',
+        'bl',
         # Apps, navegadores e IA: borrar apps basura es lo que mas libera
         'db', 'eb', 'ia', 'iap', 'iao', 'rc', 'edge', 'chr',
         # Privacidad y telemetria: primero lo que ademas corre en segundo plano (servicios y tareas)
@@ -3162,7 +3160,6 @@ if ($Casillas.Debloat.ContainsKey('dold') -and $Casillas.Debloat.ContainsKey('db
 # Opciones que chocan: con las dos marcadas una anula o contradice a la otra, asi que se pregunta cual dejar
 $Conflictos = @(
     @('Debloat|mc',  'Gaming|sm',   'La compresion de memoria necesita SysMain prendido, y la otra opcion lo apaga.', 'C'),
-    @('Debloat|av',  'Gaming|avl',  'Una apaga Defender del todo y la otra solo le baja el uso de CPU: con Defender apagado no sirve de nada.'),
     @('Gaming|xb', 'Gaming|dvr', 'Borrar la Game Bar ya apaga las grabaciones en segundo plano.'),
     @('Gaming|ms', 'Gaming|vpf', 'Mouse competitivo deja la velocidad fija en 10 y la otra la ajusta sola segun la resolucion: se pisan.', 'C'),
     @('Gaming|foc', 'Gaming|fsm', 'Las dos apagan la tecla Windows: una con un programa solo en juegos y la otra desde el registro, siempre. Con una alcanza.', 'C'),
@@ -4731,13 +4728,15 @@ $spH.Children.Add((Nueva-Herramienta 'Borrar una cuenta de esta PC' 'te muestra 
 $bSin = Nuevo-Boton 'Quitar la contrasena' '#60A5FA'; $bSin.Tag = 'al=S'
 $bCon = Nuevo-Boton 'Volver a usar contrasena'; $bCon.Tag = 'al=R'
 $spH.Children.Add(($script:CardSin = Nueva-Herramienta 'Entrar a Windows sin contrasena' 'tu cuenta pasa a ser local y sin contrasena. Si es una cuenta de Microsoft, te guia para pasarla a local.' 'entras directo a Windows.' 'cualquiera que prenda la PC entra, y no anda el Escritorio remoto.' @($bSin, $bCon))) | Out-Null
-$bWin = Nuevo-Boton 'Activacion de Windows' '#60A5FA'
-$bWin.Add_Click({
-    if (-not (Confirmar 'Activar Windows' ('Se abre PowerShell y corre el comando oficial de Massgrave:' + "`n`n" + 'irm https://get.activated.win | iex') 'Abrir' '#60A5FA' 'Cancelar')) { return }
-    Start-Process -FilePath 'powershell.exe' -ArgumentList '-NoProfile -ExecutionPolicy Bypass -Command "irm https://get.activated.win | iex"'
+# --- Herramienta: volver a encender el antivirus que apagaban las versiones viejas de Brio (la opcion ya no existe) ---
+$bAv = Nuevo-Boton 'Restaurar el antivirus' '#60A5FA'
+$bAv.Add_Click({
+    if (-not (Confirmar 'Restaurar el antivirus' ('Vuelve a encender Defender y SmartScreen como vienen en Windows y quita las politicas que los apagaban.' + "`n`n" + 'La Proteccion contra alteraciones la encendes vos en Seguridad de Windows. Seguir?') 'Restaurar el antivirus' '#60A5FA' 'Cancelar')) { return }
+    $script:HerrTitulo = 'Restaurar el antivirus'
+    Correr @([pscustomobject]@{ Nombre = 'Restaurar el antivirus'; Ruta = $Rutas.Debloat; Vars = @{ XR_av = 'R' }; Cambios = 1; Visible = $false; Tipo = 'herroculta' }) $false 'Restaurando el antivirus'
 })
-$spH.Children.Add((Nueva-Herramienta 'Activar Windows' 'ejecuta el comando oficial de Massgrave para activar Windows de manera segura.' '' '' @($bWin))) | Out-Null
-# Orden en pantalla: primero lo de la cuenta y reparar Windows; Activar Windows queda despues de esas tres
+$spH.Children.Add((Nueva-Herramienta 'Restaurar el antivirus de Windows' 'vuelve a encender Defender y SmartScreen si los apagaste con una version vieja de Brio.' 'la PC vuelve a estar protegida contra virus.' 'Smart App Control no vuelve sin reinstalar Windows.' @($bAv))) | Out-Null
+# Orden en pantalla: primero lo de la cuenta y reparar Windows; el resto queda despues de esas tres
 $posH = 1
 foreach ($cH in @($script:CardSin, $cardLocal, $script:CardRep)) { $spH.Children.Remove($cH); $spH.Children.Insert($posH, $cH); $posH++ }
 $Paginas.Herr = $spH
@@ -5475,12 +5474,12 @@ $Perfiles = @(
     },
     [pscustomobject]@{
         Id = 'tiny'; Nombre = 'RAM minima'; Color = '#60A5FA'
-        Hace = 'lo mas cerca de un Windows recortado sin reinstalar: todo lo de RAM liviana y ademas apaga la hibernacion, el antivirus y BitLocker, Windows Update (y sus drivers), Bluetooth, la Store y el Centro de seguridad, quita la Microsoft Store y los componentes viejos (Internet Explorer, WordPad, SMBv1, PowerShell 2), baja los servicios de usuario y de red local, la grabacion de juegos y el NVIDIA extra, y desactiva la integridad de memoria y VBS.'
+        Hace = 'lo mas cerca de un Windows recortado sin reinstalar: todo lo de RAM liviana y ademas apaga la hibernacion, BitLocker, Windows Update (y sus drivers), Bluetooth, la Store y el Centro de seguridad, quita la Microsoft Store y los componentes viejos (Internet Explorer, WordPad, SMBv1, PowerShell 2), baja los servicios de usuario y de red local, la grabacion de juegos y el NVIDIA extra, y desactiva la integridad de memoria y VBS.'
         Ideal = 'una PC vieja o con poca RAM que solo tiene que abrir uno o dos programas con el menor consumo posible, sabiendo lo que haces.'
         NoToca = 'los ajustes de juego competitivo, ni Edge ni Chrome. Crea un punto de restauracion antes de empezar.'
-        Adv = 'la PC queda sin antivirus, sin parches de seguridad (Windows Update apagado), sin Store ni Bluetooth, y dejan de andar WSL, Docker y las maquinas virtuales. Si el disco estaba cifrado con BitLocker, la PC va mas lenta hasta que termine de descifrarse. Para pasar de ahi hace falta una ISO recortada (tiny11 o NTLite): desde una Windows instalada no se llega a 0,5 GB.'
+        Adv = 'la PC queda sin parches de seguridad (Windows Update apagado), sin Store ni Bluetooth, y dejan de andar WSL, Docker y las maquinas virtuales. Si el disco estaba cifrado con BitLocker, la PC va mas lenta hasta que termine de descifrarse. Para pasar de ahi hace falta una ISO recortada (tiny11 o NTLite): desde una Windows instalada no se llega a 0,5 GB.'
         Estima = 'alrededor de 3 GB de RAM en uso, sin nada abierto en Windows 11 (medido en una PC real; varia con el hardware y los drivers). Para bajar de ahi hace falta una ISO recortada (tiny11 o NTLite).'
-        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'tp', 'tpn', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'rsv', 'dia', 'svh', 'mc', 'ofb', 'db', 'hib', 'fx', 'trn', 'sch', 'sns', 'av', 'bl', 'ini', 'tsk', 'cdp', 'clh', 'fsb', 'rap', 'sud', 'upd', 'rmin', 'nvl', 'nvt', 'thm', 'leg', 'apl', 'wer', 'bt', 'msx', 'old', 'usv', 'wus')
+        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'tp', 'tpn', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'rsv', 'dia', 'svh', 'mc', 'ofb', 'db', 'hib', 'fx', 'trn', 'sch', 'sns', 'bl', 'ini', 'tsk', 'cdp', 'clh', 'fsb', 'rap', 'sud', 'upd', 'rmin', 'nvl', 'nvt', 'thm', 'leg', 'apl', 'wer', 'bt', 'msx', 'old', 'usv', 'wus')
         G = @('tk', 'du', 'gm', 'ext', 'hid', 'md', 'pca', 'stg', 'mi', 'vbs', 'wsr', 'dvr')
         # Opciones sueltas que pasaron a ser servicios de "Servicios del Sistema" (De en $Elegibles.rsv): el perfil los sigue apagando
         Rsv = @('rnet', 'rdp')
@@ -5505,11 +5504,11 @@ $Perfiles = @(
     },
     [pscustomobject]@{
         Id = 'full'; Nombre = 'Full Optimizado'; Color = '#F28B82'
-        Hace = 'Windows lo mas liviano posible: todo el debloat y la optimizacion del sistema, y ademas apaga el antivirus y BitLocker, bloquea la telemetria en hosts y apaga Teredo y Windows Search. No toca la integridad de memoria ni VBS.'
+        Hace = 'Windows lo mas liviano posible: todo el debloat y la optimizacion del sistema, y ademas apaga BitLocker, bloquea la telemetria en hosts y apaga Teredo y Windows Search. No toca la integridad de memoria ni VBS.'
         Ideal = 'una PC justa o vieja que necesita todo el rendimiento del sistema, sabiendo lo que haces.'
         NoToca = 'la integridad de memoria ni VBS, los ajustes de juego competitivo (mouse, prioridad, afinidad, plan de energia, temporizador y red), ni Edge ni Chrome. Crea un punto de restauracion antes de empezar.'
-        Adv = 'la PC queda sin antivirus. Borra Riot Vanguard y cierra Riot (lo reinstalas abriendo el cliente de Riot), y deja de andar WSL, Docker y las maquinas virtuales. REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.'
-        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'tp', 'tpn', 'tps', 'eb', 'su', 'ia', 'iap', 'iao', 'hib', 'fx', 'trn', 'sch', 'sns', 'sv', 'wud', 'db', 'av', 'bl', 'hst', 'ter', 'ini', 'tsk', 'cdp', 'clh', 'fsb', 'rap', 'sud', 'upd', 'old')
+        Adv = 'borra Riot Vanguard y cierra Riot (lo reinstalas abriendo el cliente de Riot), y deja de andar WSL, Docker y las maquinas virtuales. REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.'
+        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'tp', 'tpn', 'tps', 'eb', 'su', 'ia', 'iap', 'iao', 'hib', 'fx', 'trn', 'sch', 'sns', 'sv', 'wud', 'db', 'bl', 'hst', 'ter', 'ini', 'tsk', 'cdp', 'clh', 'fsb', 'rap', 'sud', 'upd', 'old')
         G = @('tk', 'du', 'gm', 'ext', 'hid', 'md', 'mm', 'xb', 'gf', 'wgo', 'pca', 'ram', 'sm', 'stg', 'wsr')
     }
 )
@@ -5535,7 +5534,7 @@ foreach ($pf in $Perfiles) {
     # Titulo que baja de renglon con sus iconos al final (en una fila horizontal se cortaba con la ventana achicada)
     $tit = Nuevo-Texto $pf.Nombre 15 '#FFFFFF' $true
     if (($pf.Id -like 'full*' -or $pf.Id -eq 'tiny')) {
-        $porque = ('Tiene la alerta porque apaga el antivirus (Defender, SmartScreen y Smart App Control): la PC queda sin proteccion contra virus.' + "`n" + 'Tambien apaga BitLocker, la integridad de memoria y VBS, y desinstala Riot Vanguard (lo reinstalas abriendo el cliente de Riot).')
+        $porque = 'Tiene la alerta porque apaga BitLocker, la integridad de memoria y VBS, y desinstala Riot Vanguard (lo reinstalas abriendo el cliente de Riot).'
         Icono-Pegado $tit $Aviso 'Segoe UI Symbol' '#E5B567' ''
         $card.ToolTip = (Con-Enie $porque)
         [Windows.Controls.ToolTipService]::SetShowDuration($card, 30000)
@@ -5741,7 +5740,7 @@ function Aplicar-Perfil([string]$id) {
     $pf = Perfil-De $id
     if (-not (Perfil-ConDrivers $pf)) { return }
     if (($id -like 'full*' -or $id -eq 'tiny')) {
-        $que = $(if ($id -eq 'tiny') { 'Este perfil es EXTREMO y va a apagar o quitar: el antivirus, BitLocker, la integridad de memoria y VBS, Windows Update, la Microsoft Store, Bluetooth, los componentes viejos de Windows y servicios de usuario y de red local (impresion, compartir y Escritorio remoto). La PC queda sin proteccion contra virus ni parches de seguridad, y dejan de andar WSL, Docker y las maquinas virtuales. Casi todo se restablece desde la app; borrar apps (Store y apps basura) no tiene vuelta atras. Si tu antivirus avisa de algun cambio, no lo desactives por tu cuenta: la app te guia.' } else { 'Este perfil apaga el antivirus y BitLocker. La PC queda sin proteccion contra virus.' })
+        $que = $(if ($id -eq 'tiny') { 'Este perfil es EXTREMO y va a apagar o quitar: BitLocker, la integridad de memoria y VBS, Windows Update, la Microsoft Store, Bluetooth, los componentes viejos de Windows y servicios de usuario y de red local (impresion, compartir y Escritorio remoto). La PC queda sin parches de seguridad, y dejan de andar WSL, Docker y las maquinas virtuales. Casi todo se restablece desde la app; borrar apps (Store y apps basura) no tiene vuelta atras.' } else { 'Este perfil apaga BitLocker: si te roban la PC, pueden leer tus archivos.' })
         if (-not (Confirmar ($Aviso + ' ' + $pf.Nombre) ($que + "`n`n" + 'Seguir?') 'Si, aplicar' '#B3412F' 'Cancelar')) { return }
     }
     if ((Marcar-Perfil $id $true) -eq 0) { return }
@@ -6676,7 +6675,7 @@ function Fin-Descarga($s) {
     # Todo bajado y reemplazado: se abre la app nueva y se cierra esta
     $ui.CargaTitulo.Text = (Con-Enie 'Actualizacion lista')
     Poner-Progreso 1 'Abriendo la version nueva...'
-    Start-Process -FilePath 'powershell.exe' -WindowStyle Hidden -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $AppPath + '"')
+    Start-Process -FilePath 'powershell.exe' -WindowStyle Hidden -ArgumentList ('-NoProfile -STA -WindowStyle Hidden -File "' + $AppPath + '"')
     $script:CierreTimer = New-Object Windows.Threading.DispatcherTimer
     $script:CierreTimer.Interval = [TimeSpan]::FromMilliseconds(900)
     $script:CierreTimer.Add_Tick({ $script:CierreTimer.Stop(); Cerrar-Suave $true })
@@ -6908,7 +6907,7 @@ function Siguiente {
     if (($t.Ruta -like '*.ps1') -and $t.Visible) {
         # Herramientas que te piden datos: ventana de PowerShell a la vista (las respuestas van en las variables XR_)
         $ui.Estado.Text = (Con-Enie ($t.Nombre + ': responde en la ventana negra del script. Cuando termine, la app sigue sola.'))
-        $script:Proc = Start-Process -FilePath 'powershell.exe' -ArgumentList ('-NoProfile -ExecutionPolicy Bypass -File "' + $t.Ruta + '" -Consola herr') -WorkingDirectory $Root -PassThru
+        $script:Proc = Start-Process -FilePath 'powershell.exe' -ArgumentList ('-NoProfile -File "' + $t.Ruta + '" -Consola herr') -WorkingDirectory $Root -PassThru
     } elseif ($t.Ruta -like '*.ps1') {
         $salida = Nueva-Salida
         $t | Add-Member -NotePropertyName Salida -NotePropertyValue $salida -Force
@@ -7481,42 +7480,6 @@ function Submenu-Opcion([string]$id) {
     return @{ Valor = (@($sel | Where-Object { -not $_.Enc } | ForEach-Object { $_.Clave }) -join "`t"); On = @($sel | Where-Object { $_.Enc } | ForEach-Object { $_.Clave }); Prot = @($sel | Where-Object { $_.Prot } | ForEach-Object { $_.Nombre }); ProtIds = @($sel | Where-Object { $_.Prot } | ForEach-Object { $_.Clave }); Av = @($sel | Where-Object { $_.Aviso }) }
 }
 
-# Proteccion contra alteraciones, con mas de una senal: ip = Get-MpComputerStatus.IsTamperProtected ($true, $false o $null si no existe o fallo)
-# y reg = HKLM\SOFTWARE\Microsoft\Windows Defender\Features\TamperProtection (en Windows 11 build 26300 con la proteccion encendida vale 1 y
-# IsTamperProtected da True; la documentacion de Microsoft usa 5 = encendida y 4 = apagada, y 0 tambien se ve apagada).
-# Devuelve 'on', 'off' o 'desconocido'. Cualquier duda cuenta como encendida: nunca se sigue en silencio.
-function Tamper-Estado($ip, $reg) {
-    $regOn = (($null -ne $reg) -and (@(1, 5) -contains [int]$reg))
-    $regOff = (($null -ne $reg) -and (@(0, 4) -contains [int]$reg))
-    if ($ip -eq $true) { return 'on' }
-    if ($regOn) { return 'on' }
-    if (($ip -eq $false) -and ($regOff -or ($null -eq $reg))) { return 'off' }
-    if (($null -eq $ip) -and $regOff) { return 'off' }
-    return 'desconocido'
-}
-function Tamper-Leer {
-    $ip = $null; $reg = $null
-    try { $v = (Get-MpComputerStatus -ErrorAction Stop).IsTamperProtected; if ($null -ne $v) { $ip = [bool]$v } } catch { }
-    try { $r = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows Defender\Features' -Name 'TamperProtection' -ErrorAction Stop).TamperProtection; if ($null -ne $r) { $reg = [int]$r } } catch { }
-    return (Tamper-Estado $ip $reg)
-}
-# Antes de apagar Defender: la Proteccion contra alteraciones solo la puede apagar la persona. La app abre Seguridad de
-# Windows, espera a que la apagues y recien sigue cuando confirmas. Si no se puede saber como esta, se pide igual que la apague.
-function Pausa-Tamper {
-    $e = Tamper-Leer
-    if ($e -eq 'off') { return $true }
-    while ($true) {
-        Abrir-Normal 'windowsdefender://threatsettings'
-        $m = $(if ($e -eq 'desconocido') { (Con-Enie 'No pude comprobar si la Proteccion contra alteraciones esta encendida. Por las dudas, apagala vos antes de seguir.') + "`n`n" } else { '' }) + 'Para apagar el antivirus, primero apaga vos la "Proteccion contra alteraciones" (Windows no deja que un programa la apague).' + "`n`n" + '1. Se abrio Seguridad de Windows, en Configuracion de antivirus y proteccion contra amenazas.' + "`n" + '2. Apaga "Proteccion contra alteraciones" y acepta el cartel de Windows.' + "`n" + '3. Volve aca y toca "Ya la apague".' + "`n`n" + 'Mientras tanto la app espera: todavia no se aplico nada.'
-        if (-not (Confirmar 'Antivirus: falta un paso tuyo' $m 'Ya la apague' '#60A5FA' 'Cancelar')) { return $false }
-        $e = Tamper-Leer
-        if ($e -eq 'off') { return $true }
-        # Si no se puede comprobar, se sigue con tu palabra (ya la apagaste y lo confirmaste); si se ve encendida, se vuelve a pedir
-        if ($e -eq 'desconocido') { return $true }
-        Avisar ($Aviso + ' Sigue encendida') 'La Proteccion contra alteraciones todavia esta encendida. Se vuelve a abrir Seguridad de Windows para que la apagues.'
-    }
-}
-
 # ------------------------------------------------------------
 # Dispositivos conectados que dependen de lo que se va a aplicar (musicos: MIDI e interfaces de audio; ademas
 # impresoras, joysticks, Bluetooth, biometria, tarjetas, camaras y escaneres). Solo se LEE; se hace una vez y queda guardado.
@@ -7790,7 +7753,6 @@ function Aplicar-Seleccion([string]$perfil = '') {
         $vD['XSEL_rsv'] = (@($script:Elegibles.rsv | Where-Object { (-not $_.Aviso) -and (-not ($_.Nb -and $script:EsNotebook)) -and ((-not $_.De) -or ($deTiny -contains $_.De)) } | ForEach-Object { $_.Id }) -join "`t")
     }
     foreach ($id in $selD) { $vD['XR_' + $id] = 'S' }
-    if (($selD -contains 'av') -and (-not (Pausa-Tamper))) { return }
 
     $n = $selD.Count + $selG.Count
     if (-not $perfil) {
@@ -7825,7 +7787,6 @@ function Restablecer-Seleccion {
     if ($n -eq 0) { Avisar 'Restablecer' ('Las opciones que marcaste no tienen restablecimiento: ' + ($sinR -join ', ') + '.'); return }
     $m = $(if ($n -eq 1) { 'Se va a restablecer 1 opcion a como viene en Windows.' } else { 'Se van a restablecer ' + $n + ' opciones a como vienen en Windows.' })
     $notas = @()
-    if ($sel -contains 'Debloat|av') { $notas += 'El antivirus vuelve, pero la Proteccion contra alteraciones la encendes vos y Smart App Control no vuelve sin reinstalar Windows.' }
     if ($sel -contains 'Debloat|bl') { $notas += 'BitLocker solo deja de estar bloqueado: no vuelve a cifrar el disco.' }
     if (($sel -contains 'Debloat|edge') -or ($sel -contains 'Debloat|wg') -or ($sel -contains 'Gaming|xb')) { $notas += 'Edge, los Widgets y la Game Bar se reinstalan (tarda un poco mas).' }
     if ($sel -contains 'Gaming|xbt') { $notas += 'Xbox se reinstala desde la Store con winget (hace falta internet). Xbox TCUI y la transcripcion del chat de Xbox los instala la app de Xbox o la Store cuando hagan falta. Despues reinicia la PC.' }
@@ -8060,7 +8021,7 @@ function Elegir-Tema {
     $script:TemaCfg = $nuevo
     # Si se ve igual (por ejemplo Sistema con Windows en oscuro y ya estabas en Oscuro) no hace falta reabrir
     if ($claroNuevo -eq $script:Claro) { $ui.TemaTxt.Text = (Texto-Tema); return }
-    Start-Process -FilePath 'powershell.exe' -WindowStyle Hidden -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $AppPath + '"')
+    Start-Process -FilePath 'powershell.exe' -WindowStyle Hidden -ArgumentList ('-NoProfile -STA -WindowStyle Hidden -File "' + $AppPath + '"')
     Cerrar-Suave $true
 }
 $ui.BtnTema.ToolTip = (Con-Enie 'Cambiar el tema (Sistema, Claro u Oscuro)')
@@ -8080,7 +8041,7 @@ $ui.BtnIdioma.Add_Click({
     $f = Join-Path (Join-Path $LangDir $nuevo) 'textos.txt'
     if (($nuevo -ne 'es-mx') -and (-not (Test-Path -LiteralPath $f))) { Avisar 'Cambiar idioma' ((Con-Enie 'No se encontro el archivo de idioma:') + "`n" + $f); return }
     Guardar-Config 'idioma' $nuevo
-    Start-Process -FilePath 'powershell.exe' -WindowStyle Hidden -ArgumentList ('-NoProfile -STA -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $AppPath + '"')
+    Start-Process -FilePath 'powershell.exe' -WindowStyle Hidden -ArgumentList ('-NoProfile -STA -WindowStyle Hidden -File "' + $AppPath + '"')
     Cerrar-Suave $true
 })
 
