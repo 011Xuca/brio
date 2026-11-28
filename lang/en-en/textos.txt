@@ -660,8 +660,8 @@ en: any PC, even someone's who doesn't know about this.
 es: la seguridad, el procesador ni tus programas: solo borra lo que viene de fabrica (WhatsApp, Xbox y la Store quedan).
 en: security, the processor or your programs: it only deletes what comes preinstalled (WhatsApp, Xbox and the Store stay).
 
-es: borrar las apps basura no tiene restablecimiento: si queres alguna, la reinstalas desde la Store. Sin los servicios que casi nadie usa, el escaner de Windows y el Media Player viejo dejan de estar.
-en: deleting bloatware apps can't be reset: if you want one back, reinstall it from the Store. Without the services almost nobody uses, Windows Scan and the old Media Player are gone.
+es: borrar las apps basura no tiene restablecimiento: si queres alguna, la reinstalas desde la Store. Sin los servicios que casi nadie usa, no podes mandar faxes desde Windows y las apps no encuentran tu ubicacion.
+en: deleting bloatware apps can't be reset: if you want one back, reinstall it from the Store. Without the services almost nobody uses, you can't send faxes from Windows and apps can't find your location.
 
 es: todo lo de Seguro, y ademas deja Windows mas liviano: apaga la hibernacion, los efectos visuales, los sonidos, las apps basura de inicio, SysMain, el Asistente de compatibilidad y el Storage Sense, y Windows Update deja de instalar drivers.
 en: everything in Safe, and it also makes Windows lighter: turns off hibernation, visual effects, sounds, bloatware startup apps, SysMain, the Compatibility Assistant and Storage Sense, and Windows Update stops installing drivers.
@@ -3670,8 +3670,8 @@ en: Nitro Mode, the High performance plan and Low latency are left out on purpos
 es: el antivirus (ni sus analisis), BitLocker, la integridad de memoria ni VBS, ni el plan de energia ni el procesador (nada de Alto rendimiento, Modo Nitro ni Baja latencia); tampoco borra apps.
 en: the antivirus (or its scans), BitLocker, memory integrity or VBS, or the power plan or the processor (no High performance, Nitro Mode or Low latency); it does not delete apps either.
 
-es: Windows lo mas liviano posible: todo el debloat y la optimizacion del sistema, y ademas apaga BitLocker, bloquea la telemetria en hosts y apaga Teredo y Windows Search. No toca la integridad de memoria ni VBS.
-en: Windows as light as possible: all of the debloat and system optimization, and it also turns off BitLocker, blocks telemetry in hosts and turns off Teredo and Windows Search. It does not touch memory integrity or VBS.
+es: Windows lo mas liviano posible: todo el debloat y la optimizacion del sistema, y ademas apaga BitLocker, Teredo y Windows Search. No toca la integridad de memoria ni VBS.
+en: Windows as light as possible: all of the debloat and system optimization, and it also turns off BitLocker, Teredo and Windows Search. It does not touch memory integrity or VBS.
 
 es: la integridad de memoria ni VBS, los ajustes de juego competitivo (mouse, prioridad, afinidad, plan de energia, temporizador y red), ni Edge ni Chrome. Crea un punto de restauracion antes de empezar.
 en: memory integrity or VBS, the competitive gaming tweaks (mouse, priority, affinity, power plan, timer and network), or Edge or Chrome. It creates a restore point before starting.
@@ -4525,3 +4525,39 @@ en: the PC is protected against viruses again.
 
 es: Smart App Control no vuelve sin reinstalar Windows.
 en: Smart App Control doesn't come back without reinstalling Windows.
+
+es: Tambien devuelve el limite de CPU de los analisis a como viene en Windows.
+en: It also puts the scan CPU limit back the way Windows ships it.
+
+es: Quitar el bloqueo viejo
+en: Remove the old block
+
+es: Quitar el bloqueo de telemetria viejo
+en: Remove the old telemetry block
+
+es: Quitando el bloqueo de telemetria viejo
+en: Removing the old telemetry block
+
+es: Saca del archivo hosts solo las lineas que agrego una version vieja de Brio para bloquear servidores de telemetria. El resto del archivo queda como estaba.
+en: Removes from the hosts file only the lines an old version of Brio added to block telemetry servers. The rest of the file stays as it was.
+
+es: Quitar el bloqueo de telemetria de una version vieja
+en: Remove the telemetry block from an old version
+
+es: saca las lineas que una version vieja de Brio agrego al archivo hosts para bloquear servidores de telemetria. El resto del archivo queda como estaba.
+en: removes the lines an old version of Brio added to the hosts file to block telemetry servers. The rest of the file stays as it was.
+
+es: Windows Update vuelve a llegar al servidor de compatibilidad (sin eso puede no ofrecerte la version nueva) y Defender deja de avisar por esas lineas.
+en: Windows Update can reach the compatibility server again (without it, it may not offer you the new version) and Defender stops warning about those lines.
+
+es: ninguna: la version actual de Brio ya no hace ese bloqueo.
+en: none: the current version of Brio no longer does that block.
+
+es: el bloqueo de telemetria de una version vieja
+en: the telemetry block from an old version
+
+es: Diagnostico de Windows
+en: Windows diagnostics
+
+es: Que es: busca problemas solo y arranca los hosts de diagnostico. Apagarlo: + uno a tres procesos menos / - Windows no detecta problemas solo y el uso de apps y bateria de Configuracion no se actualiza.
+en: What it is: finds problems on its own and starts the diagnostic hosts. Turning it off: + one to three fewer processes / - Windows doesn't detect problems on its own and app and battery usage in Settings stop updating.

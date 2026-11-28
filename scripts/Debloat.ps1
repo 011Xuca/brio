@@ -10,8 +10,8 @@
 # ============================================================
 
 # Opciones que necesitan reiniciar para aplicarse. Solo se pide reiniciar si alguna de estas cambio algo de verdad.
-# Las opciones que salieron de dividir una que pedia reiniciar (ad -> bng, pv -> pvu...pvl) lo siguen pidiendo igual.
-$ReinDebloat = @('av', 'rc', 'ad', 'bng', 'sv', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'ms_acc', 'al', 'cta')
+# Las opciones que salieron de dividir una que pedia reiniciar (ad -> bng, pv -> pvu...pvm) lo siguen pidiendo igual.
+$ReinDebloat = @('av', 'rc', 'ad', 'bng', 'sv', 'pv', 'pvu', 'pvs', 'pve', 'pvv', 'pvm', 'ms_acc', 'al', 'cta')
 
 # Tareas de telemetria (opcion "Reducir la telemetria")
 $TareasTelemetria = @(
@@ -84,28 +84,6 @@ $TareasOffice = @('\Microsoft\Office\Office Startup Boost', '\Microsoft\Office\O
 # Servicios de Xbox (opcion "xbs"). Gaming Services (GamingServices, GamingServicesNet) no se toca aca: sin el no anda Game Pass (solo lo quita "xbt" de Gaming).
 $ServiciosXbox = @('XblAuthManager', 'XblGameSave', 'XboxGipSvc', 'XboxNetApiSvc')
 
-# Servidores de telemetria que se bloquean en el archivo hosts
-$HostsTelemetria = @(
-    'vortex.data.microsoft.com', 'vortex-win.data.microsoft.com', 'v10.vortex-win.data.microsoft.com',
-    'us.vortex-win.data.microsoft.com', 'eu.vortex-win.data.microsoft.com', 'v10.events.data.microsoft.com',
-    'v20.events.data.microsoft.com', 'self.events.data.microsoft.com', 'umwatson.events.data.microsoft.com',
-    'watson.events.data.microsoft.com', 'telecommand.telemetry.microsoft.com',
-    'telecommand.telemetry.microsoft.com.nsatc.net', 'oca.telemetry.microsoft.com',
-    'oca.telemetry.microsoft.com.nsatc.net', 'sqm.telemetry.microsoft.com',
-    'sqm.telemetry.microsoft.com.nsatc.net', 'watson.telemetry.microsoft.com',
-    'watson.telemetry.microsoft.com.nsatc.net', 'watson.ppe.telemetry.microsoft.com',
-    'df.telemetry.microsoft.com', 'reports.wes.df.telemetry.microsoft.com', 'wes.df.telemetry.microsoft.com',
-    'services.wes.df.telemetry.microsoft.com', 'sqm.df.telemetry.microsoft.com', 'telemetry.microsoft.com',
-    'telemetry.urs.microsoft.com', 'telemetry.appex.bing.net', 'redir.metaservices.microsoft.com',
-    'choice.microsoft.com', 'choice.microsoft.com.nsatc.net', 'settings-sandbox.data.microsoft.com',
-    'vortex-sandbox.data.microsoft.com', 'survey.watson.microsoft.com', 'watson.live.com',
-    'watson.microsoft.com', 'statsfe2.ws.microsoft.com', 'corpext.msitadfs.glbdns2.microsoft.com',
-    'compatexchange.cloudapp.net'
-)
-
-# Nunca se bloquean los servidores de la activacion y las licencias de Windows (aunque alguien los sume a la lista)
-$HostsTelemetria = @($HostsTelemetria | Where-Object { $_ -notmatch '(?i)(^|\.)(sls|licensing|activation|validation|displaycatalog|purchase|login\.live)\.' })
-
 # ------------------------------------------------------------
 # Submenus de la app: que se puede elegir en "Servicios del Sistema" (seguros y extremos), "Apps del Sistema" y en las apps
 # antiguas y modernas. Id = lo que recibe el script (XSEL_<opcion>), Nombre y Desc = lo que ve la persona,
@@ -177,7 +155,8 @@ $Elegibles = @{
         (Elegible 'SessionEnv' 'Escritorio remoto: sesiones' 'Que es: prepara las sesiones de Escritorio remoto. Apagarlo: + un servicio menos / - no anda Escritorio remoto.' $false $false $false $true '' 'rdp'),
         (Elegible 'UmRdpService' 'Escritorio remoto: aparatos' 'Que es: pasa impresoras y discos a Escritorio remoto. Apagarlo: + un servicio menos / - no anda Escritorio remoto.' $false $false $false $true '' 'rdp'),
         (Elegible 'Themes' 'Temas' 'Que es: el estilo visual de Windows (temas y fondos). Apagarlo: + ahorra poca RAM / - los programas clasicos se ven viejos y planos.' $false $false $false $true '' 'tem'),
-        (Elegible 'WSAIFabricSvc' 'IA de Windows (AI Fabric)' 'Que es: corre los modelos de IA locales de Windows. Apagarlo: + un servicio menos / - no andan Click to Do ni la IA de Fotos y Paint.' $false $false $false $true '' 'aif')
+        (Elegible 'WSAIFabricSvc' 'IA de Windows (AI Fabric)' 'Que es: corre los modelos de IA locales de Windows. Apagarlo: + un servicio menos / - no andan Click to Do ni la IA de Fotos y Paint.' $false $false $false $true '' 'aif'),
+        (Elegible 'DPS' 'Diagnostico de Windows' 'Que es: busca problemas solo y arranca los hosts de diagnostico. Apagarlo: + uno a tres procesos menos / - Windows no detecta problemas solo y el uso de apps y bateria de Configuracion no se actualiza.' $false $false $false $true '' 'dia')
     )
     # Apps: las basura (marcadas) salen de $AppsBasura; estas son las que se pueden sumar a mano
     db = @(
@@ -234,7 +213,7 @@ $KeepModernas = '^(Microsoft\.\w*(Video|Image|Media)Extension|Microsoft\.ScreenS
 
 # Inicio original de cada servicio de "Servicios del Sistema": se anota antes de apagarlo y Restablecer lo devuelve tal cual estaba
 # Sin anotar (lo apago otra version o una opcion vieja), vuelven a su inicio de Windows: estos automaticos y el resto en Manual
-$SvcIniDef = @{ TrkWks = 'auto'; LanmanServer = 'auto'; 'NVDisplay.ContainerLocalSystem' = 'auto'; Themes = 'auto'; WSAIFabricSvc = 'auto'; InventorySvc = 'delayed-auto'; whesvc = 'delayed-auto' }
+$SvcIniDef = @{ TrkWks = 'auto'; LanmanServer = 'auto'; 'NVDisplay.ContainerLocalSystem' = 'auto'; Themes = 'auto'; WSAIFabricSvc = 'auto'; InventorySvc = 'delayed-auto'; whesvc = 'delayed-auto'; DPS = 'auto' }
 function Svc-Archivo { return (Join-Path (Join-Path $env:ProgramData 'Brio') 'svc_orig.txt') }
 function Svc-Inicio([string]$n) {
     $p = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $n) -ErrorAction SilentlyContinue
@@ -316,6 +295,21 @@ function Quitar-Protegida([string]$n) {
 
 function Hosts-Tiene([string]$h) {
     try { return ([IO.File]::ReadAllText($h, [Text.Encoding]::Default)).Contains('# xuca-telemetria') } catch { return $false }
+}
+# Los renglones del hosts sin los que agrego una version vieja (y sin el renglon vacio que ponia antes de ellos): queda como estaba
+function Hosts-SinBrio([string[]]$lineas) {
+    $l = New-Object System.Collections.Generic.List[string]
+    $enBloque = $false
+    foreach ($x in $lineas) {
+        if ($x.Contains('# xuca-telemetria')) {
+            if ((-not $enBloque) -and ($l.Count -gt 0) -and ($l[$l.Count - 1] -eq '')) { $l.RemoveAt($l.Count - 1) }
+            $enBloque = $true
+            continue
+        }
+        $enBloque = $false
+        $l.Add($x)
+    }
+    return , $l.ToArray()
 }
 
 # Brio ya no apaga el antivirus. Esto solo deshace lo que dejaban las versiones viejas (politicas de Defender, SmartScreen y Edge).
@@ -1552,22 +1546,7 @@ function Debloat-Act([string]$XAct, [string]$XDato) {
         if ($quedo -gt 0) { Say ('  Quedaron {0} carpetas que Windows no dejo borrar o que siguen en uso.' -f $quedo) 'Yellow' }
     }
 
-    'FUN_OFF' {
-        $feats = 'Internet-Explorer-Optional-amd64', 'FaxServicesClientPackage', 'WindowsMediaPlayer'
-        $hay = 0; $hizo = 0; $mal = 0
-        foreach ($f in $feats) {
-            $x = Get-WindowsOptionalFeature -Online -FeatureName $f -ErrorAction SilentlyContinue
-            if (-not $x) { Log 'OMITIDO' ($f + ' no existe en esta version de Windows'); continue }
-            $hay++
-            if ([string]$x.State -eq 'Disabled') { Log 'OK' ('ya estaba desactivada ' + $f); continue }
-            Disable-WindowsOptionalFeature -Online -FeatureName $f -NoRestart -ErrorAction SilentlyContinue | Out-Null
-            $est = [string](Get-WindowsOptionalFeature -Online -FeatureName $f -ErrorAction SilentlyContinue).State
-            if ($est -eq 'Disabled' -or $est -eq 'DisablePending') { $hizo++; Log 'OK' ('desactivada ' + $f + ' (' + $est + ')') }
-            else { $mal++; Log 'FALLO' ('no se pudo desactivar ' + $f + ', quedo ' + $est); $code = 1 }
-        }
-        if ($mal -eq 0) { if ($hizo -gt 0) { $code = 0 } elseif ($hay -gt 0) { $code = 5 } else { $code = 2 } }
-    }
-
+    # Solo para restablecer "sv": hasta v1.0.13 apagaba estas funciones (ahora las quitan "old" y "dold")
     'FUN_ON' {
         $feats = 'Internet-Explorer-Optional-amd64', 'FaxServicesClientPackage', 'WindowsMediaPlayer'
         $hay = 0; $hizo = 0; $mal = 0
@@ -3062,37 +3041,39 @@ $ListaOpciones = @(
     },
     @{
         Id = 'sv'; Seccion = 'SERVICIOS Y FUNCIONES QUE CASI NADIE USA'
-        Q = '- Desea desactivar servicios y funciones que casi nadie usa? (Fax y Escaner, Internet Explorer, Media Player viejo, Mapas y mas)'
-        Hace = 'apaga servicios de Fax, Mapas, modo demo, geolocalizacion y reportes de error, y quita Internet Explorer, Fax y Escaner y el Media Player viejo.'
-        Favor = 'menos servicios y funciones cargadas en Windows.'
-        Contra = 'si usas el escaner de Windows o el Media Player viejo, dejan de estar.'
+        # v1.0.13: solo servicios. Internet Explorer, Fax y Escaner y el Media Player viejo los quitan "old" (con restablecer) y "dold".
+        Q = '- Desea desactivar servicios que casi nadie usa? (Fax, Mapas, modo demo, ubicacion y reportes de error)'
+        Hace = 'apaga los servicios de Fax, Mapas, modo demo, ubicacion y reportes de error. Internet Explorer, Fax y Escaner y el Media Player viejo los quita "Quitar componentes viejos".'
+        Favor = 'menos servicios cargados en Windows.'
+        Contra = 'no podes mandar faxes desde Windows, las apps que usan tu ubicacion no la encuentran y Windows no junta informes de errores.'
         S = {
-            Opt-Ini 'Servicios y funciones que casi nadie usa'
+            Opt-Ini 'Servicios que casi nadie usa'
             Svc 'Fax' 'disabled' '4'
             Svc 'MapsBroker' 'disabled' '4'
             Svc 'RetailDemo' 'disabled' '4'
             Svc 'lfsvc' 'disabled' '4'
             Svc 'WerSvc' 'disabled' '4'
-            Say '  Revisando las funciones de Windows, un momento...'
-            Resps (Act 'FUN_OFF')
-            Opt-Fin 'Servicios y funciones que casi nadie usa desactivados (algunas se aplican al reiniciar)'
+            Opt-Fin 'Servicios que casi nadie usa desactivados (se aplica al reiniciar)'
         }
         R = {
-            Opt-Ini 'Servicios y funciones que casi nadie usa (restaurar)'
+            Opt-Ini 'Servicios que casi nadie usa (restaurar)'
             Svc 'Fax' 'demand' '3'
             Svc 'MapsBroker' 'delayed-auto' '2'
             Svc 'RetailDemo' 'demand' '3'
             Svc 'lfsvc' 'demand' '3'
             Svc 'WerSvc' 'demand' '3'
-            Say '  Reactivando las funciones de Windows, un momento...'
-            Resps (Act 'FUN_ON')
-            Opt-Fin 'Servicios y funciones restaurados (algunas se aplican al reiniciar)'
+            # Hasta v1.0.13 esta opcion tambien apagaba esas funciones: vuelven, salvo que las haya quitado "old" o "dold" (su restablecer las devuelve)
+            if (-not ((Test-Path -LiteralPath (Join-Path $env:ProgramData 'Brio\old_apagado.txt')) -or (Test-Path -LiteralPath (Join-Path $env:ProgramData 'Brio\sv_dold.txt')))) {
+                Say '  Reactivando las funciones de Windows que apagaban las versiones viejas, un momento...'
+                Resps (Act 'FUN_ON')
+            }
+            Opt-Fin 'Servicios restaurados (algunos se aplican al reiniciar)'
         }
     },
     @{
         Id = 'rsv'; Seccion = 'SERVICIOS Y FUNCIONES QUE CASI NADIE USA'
         Q = '- Desea apagar servicios del sistema que casi nadie usa para liberar RAM? (Elegis en la lista: Seguros marcados; Extremos, con riesgo, los marcas vos; no toca Xbox ni Windows Hello)'
-        Hace = 'apaga o vuelve a prender los servicios del sistema que elijas en una lista, cada uno con su estado (Activo, Manual o Apagado). Los Seguros (Billetera, NFC, zona wifi movil, control parental, Insider, administracion remota y otros) vienen marcados; los Extremos (telefono, tarjetas inteligentes, camara, sensores, Wi-Fi Direct, Historial de archivos, compartir carpetas, Hyper-V, red local, Escritorio remoto, Temas, el contenedor de NVIDIA, el inventario de compatibilidad, la IA de Windows y mas) los marcas vos y cada uno dice que se pierde. Tambien podes volver a prender servicios sueltos: los Apagados (deshabilitados) salen en gris y los marcas. Solo cuenta como apagado un servicio deshabilitado: uno en Manual o Activo se apaga recien cuando lo marcas. Nunca toca los servicios de Xbox, Windows Hello ni el PIN.'
+        Hace = 'apaga o vuelve a prender los servicios del sistema que elijas en una lista, cada uno con su estado (Activo, Manual o Apagado). Los Seguros (Billetera, NFC, zona wifi movil, control parental, Insider, administracion remota y otros) vienen marcados; los Extremos (telefono, tarjetas inteligentes, camara, sensores, Wi-Fi Direct, Historial de archivos, compartir carpetas, Hyper-V, red local, Escritorio remoto, Temas, el contenedor de NVIDIA, el inventario de compatibilidad, la IA de Windows, el diagnostico de Windows y mas) los marcas vos y cada uno dice que se pierde. Tambien podes volver a prender servicios sueltos: los Apagados (deshabilitados) salen en gris y los marcas. Solo cuenta como apagado un servicio deshabilitado: uno en Manual o Activo se apaga recien cuando lo marcas. Nunca toca los servicios de Xbox, Windows Hello ni el PIN.'
         Favor = 'menos servicios cargados: libera algo de RAM y procesos en segundo plano.'
         Contra = 'cada servicio que apagues quita su funcion (la lista dice cual). Restablecer devuelve cada uno a como estaba antes.'
         S = {
@@ -3113,6 +3094,9 @@ $ListaOpciones = @(
             # Versiones anteriores apagaban aca la biometria (Windows Hello con huella o cara): si quedo apagada vuelve a Manual
             $wb = Svc-Inicio 'WbioSrvc'
             if ($wb -and ([int]$wb.Start -eq 4)) { Log 'INFO' 'WbioSrvc estaba deshabilitado (version anterior): vuelve a Manual'; Svc 'WbioSrvc' 'demand' '3'; Svc-Arrancar 'WbioSrvc' }
+            # Hasta v1.0.13 "Diagnostico en manual" (dia) dejaba DPS en Manual: vuelve a Automatico, como viene en Windows
+            $dp = Svc-Inicio 'DPS'
+            if ($dp -and ([int]$dp.Start -eq 3)) { Log 'INFO' 'DPS estaba en Manual (opcion vieja dia): vuelve a Automatico'; Svc 'DPS' 'auto' '2'; Svc-Arrancar 'DPS' }
             # La v1.0.11 apagaba aca los servicios de Xbox: si siguen deshabilitados vuelven a Manual (como vienen en Windows).
             # Si estan bien, no se tocan. Para tenerlos apagados a proposito esta la opcion "xbs".
             foreach ($n in $ServiciosXbox) {
@@ -3144,24 +3128,36 @@ $ListaOpciones = @(
         }
     },
     @{
-        Id = 'nvl'; Seccion = 'APPS Y PROCESOS EN SEGUNDO PLANO'
-        Q = '- Desea apagar los servicios y tareas extra de NVIDIA? (NVIDIA App, overlay y ShadowPlay quedan sin contenedor; el driver y el Panel de control siguen)'
-        Hace = 'pasa a manual y detiene el servicio que usan la app de NVIDIA, el overlay y la grabacion ShadowPlay, y apaga el que manda datos de uso y las tareas que buscan drivers y actualizaciones. No toca el servicio de pantalla: sin ese no abre el Panel de control de NVIDIA ni se mantienen los colores y G-Sync.'
-        Favor = 'hay menos procesos de NVIDIA abiertos y se libera algo de RAM, sin perder el driver.'
+        # v1.0.13: junta "Apagar extras de NVIDIA" (nvl) y "Telemetria de NVIDIA" (tpn), que apagaban el mismo servicio y las mismas tareas.
+        # Las tareas NvTm* de la telemetria entran en el filtro de abajo (con cualquier GUID).
+        Id = 'nvx'; Seccion = 'APPS Y PROCESOS EN SEGUNDO PLANO'
+        Q = '- Desea apagar los extras y la telemetria de NVIDIA? (NVIDIA App, overlay y ShadowPlay quedan sin contenedor; el driver y el Panel de control siguen. Sin placa NVIDIA no cambia nada)'
+        Hace = 'pasa a manual y detiene el servicio que usan la app de NVIDIA, el overlay y la grabacion ShadowPlay; apaga el servicio de telemetria, la recoleccion de datos del driver y del Panel de control y las tareas que mandan datos de uso y buscan drivers y actualizaciones. No toca el servicio de pantalla: sin ese no abre el Panel de control de NVIDIA ni se mantienen los colores y G-Sync.'
+        Favor = 'hay menos procesos de NVIDIA abiertos, se libera algo de RAM y se mandan menos datos, sin perder el driver.'
         Contra = 'el overlay, ShadowPlay y los filtros de la app de NVIDIA no andan hasta que el servicio corra. Si la app no abre bien, restablece la opcion. Los drivers los actualizas vos.'
         S = {
-            Opt-Ini 'NVIDIA liviano'
+            Opt-Ini 'Extras y telemetria de NVIDIA'
             Svc 'NvContainerLocalSystem' 'demand' '3'; Svc-Parar 'NvContainerLocalSystem'
             Svc 'NvTelemetryContainer' 'disabled' '4'; Svc-Parar 'NvTelemetryContainer'
+            if (Test-Path -LiteralPath 'HKLM:\SOFTWARE\NVIDIA Corporation') {
+                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID44231' 'REG_DWORD' '0'
+                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID64640' 'REG_DWORD' '0'
+                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID66610' 'REG_DWORD' '0'
+                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\NvControlPanel2\Client' 'OptInOrOutPreference' 'REG_DWORD' '0'
+            }
             foreach ($t in @(Get-ScheduledTask -TaskPath '\' -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -match '^(NvDriverUpdateCheckDaily|NVIDIA App SelfUpdate|NvTmMon|NvTmRep|NvTmRepOnLogon|NvProfileUpdater)' })) { Tarea ('\' + $t.TaskName) 'disable' }
-            Opt-Fin 'NVIDIA liviano: contenedor en manual y tareas extra apagadas'
+            Opt-Fin 'Extras y telemetria de NVIDIA apagados: contenedor en manual y tareas extra apagadas'
         }
         R = {
-            Opt-Ini 'NVIDIA liviano (restaurar)'
+            Opt-Ini 'Extras y telemetria de NVIDIA (restaurar)'
             Svc 'NvContainerLocalSystem' 'auto' '2'; Svc-Arrancar 'NvContainerLocalSystem'
             Svc 'NvTelemetryContainer' 'auto' '2'
+            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID44231'
+            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID64640'
+            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID66610'
+            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\NvControlPanel2\Client' 'OptInOrOutPreference'
             foreach ($t in @(Get-ScheduledTask -TaskPath '\' -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -match '^(NvDriverUpdateCheckDaily|NVIDIA App SelfUpdate|NvTmMon|NvTmRep|NvTmRepOnLogon|NvProfileUpdater)' })) { Tarea ('\' + $t.TaskName) 'enable' }
-            Opt-Fin 'NVIDIA restaurado'
+            Opt-Fin 'Extras y telemetria de NVIDIA restaurados'
         }
     },
     @{
@@ -3845,25 +3841,6 @@ $ListaOpciones = @(
         }
     },
     @{
-        Id = 'dia'; Seccion = 'APPS Y PROCESOS EN SEGUNDO PLANO'
-        Q = '- Desea poner en manual los servicios de diagnostico? (Ahorra RAM; Windows deja de buscar problemas solo)'
-        Hace = 'pone en manual el Servicio de directivas de diagnostico (DPS), que tambien arranca los hosts de diagnostico y el monitor de uso de recursos.'
-        Favor = 'uno a tres procesos menos en segundo plano: algunas decenas de MB de RAM (estimado, no medido).'
-        Contra = 'Windows deja de detectar problemas por su cuenta, y el historial de uso de apps, el uso de bateria por app y el uso de datos por app de Configuracion dejan de actualizarse. Si un solucionador de problemas dice que el servicio de diagnostico no esta corriendo, restablece esta opcion.'
-        S = {
-            Opt-Ini 'Servicios de diagnostico'
-            Svc 'DPS' 'demand' '3'
-            Svc-Parar 'DPS'
-            Opt-Fin 'Servicios de diagnostico en manual'
-        }
-        R = {
-            Opt-Ini 'Servicios de diagnostico (restaurar)'
-            Svc 'DPS' 'auto' '2'
-            Svc-Arrancar 'DPS'
-            Opt-Fin 'Servicios de diagnostico restaurados (automatico)'
-        }
-    },
-    @{
         Id = 'svh'; Seccion = 'APPS Y PROCESOS EN SEGUNDO PLANO'
         Q = '- Desea juntar los servicios de Windows en menos procesos? (Ahorra RAM; se nota con 4 GB o mas)'
         Hace = 'hace que Windows junte sus servicios en pocos procesos (svchost) en vez de uno por servicio.'
@@ -3881,7 +3858,7 @@ $ListaOpciones = @(
         }
     },
     @{
-        # v1.0.13: "Rastreo y recopilacion de datos" (pv) se dividio en pv, pvu, pvw, pvs, pve, pvv, pvm y pvl.
+        # v1.0.13: "Rastreo y recopilacion de datos" (pv) se dividio en pv, pvu, pvw, pvs, pve, pvv, pvm y pvl. Despues se quitaron pvw (Wifi Sense, ya no existe) y pvl (DRM del Media Player viejo y Grupo Hogar, que ya no existe).
         # Cada una toca solo sus claves; quien ya tenia aplicada la opcion grande ve las ocho como aplicadas.
         Id = 'pv'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
         Q = '- Desea apagar el historial de actividad? (Windows deja de anotar y subir lo que abris)'
@@ -3925,27 +3902,6 @@ $ListaOpciones = @(
             Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' 'DisableWindowsLocationProvider'
             Svc 'lfsvc' 'demand' '3'
             Opt-Fin 'Ubicacion de Windows restaurada'
-        }
-    },
-    @{
-        Id = 'pvw'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
-        Q = '- Desea apagar Wifi Sense? (Windows no se conecta solo a zonas wifi sugeridas ni reporta datos de ellas)'
-        Hace = 'apaga Wifi Sense: Windows deja de conectarse solo a redes wifi abiertas sugeridas y de reportar datos de las zonas wifi.'
-        Favor = 'tu PC no se conecta sola a redes publicas desconocidas.'
-        Contra = 'ninguno en el uso normal.'
-        S = {
-            Opt-Ini 'Wifi Sense'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworksettings' 'AutoConnectAllowedOEM' 'REG_DWORD' '0'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowWiFiHotSpotReporting' 'Value' 'REG_DWORD' '0'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowAutoConnectToWiFiSenseHotspots' 'Value' 'REG_DWORD' '0'
-            Opt-Fin 'Wifi Sense apagado'
-        }
-        R = {
-            Opt-Ini 'Wifi Sense (restaurar)'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworksettings' 'AutoConnectAllowedOEM' 'REG_DWORD' '1'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowWiFiHotSpotReporting' 'Value' 'REG_DWORD' '1'
-            Reg-Set 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowAutoConnectToWiFiSenseHotspots' 'Value' 'REG_DWORD' '1'
-            Opt-Fin 'Wifi Sense restaurado'
         }
     },
     @{
@@ -4039,29 +3995,6 @@ $ListaOpciones = @(
         }
     },
     @{
-        Id = 'pvl'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
-        Q = '- Desea apagar el DRM en linea de Windows Media? (Y bloquear el Grupo Hogar, que Windows 10 y 11 ya no traen)'
-        Hace = 'no deja que el Windows Media Player viejo busque en internet las licencias de musica y video protegidos, y bloquea el Grupo Hogar (una funcion vieja que Windows 10 y 11 ya no traen; se bloquea por si quedo algo).'
-        Favor = 'menos conexiones en segundo plano de funciones viejas.'
-        Contra = 'la musica o los videos viejos con proteccion (DRM) pueden no reproducirse en el Media Player viejo.'
-        S = {
-            Opt-Ini 'DRM en linea y Grupo Hogar'
-            Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\WMDRM' 'DisableOnline' 'REG_DWORD' '1'
-            Reg-Set 'HKLM\SOFTWARE\Policies\Microsoft\Windows\HomeGroup' 'DisableHomeGroup' 'REG_DWORD' '1'
-            Svc 'HomeGroupListener' 'disabled' '4'
-            Svc 'HomeGroupProvider' 'disabled' '4'
-            Opt-Fin 'DRM en linea y Grupo Hogar apagados'
-        }
-        R = {
-            Opt-Ini 'DRM en linea y Grupo Hogar (restaurar)'
-            Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\WMDRM' 'DisableOnline'
-            Reg-Del 'HKLM\SOFTWARE\Policies\Microsoft\Windows\HomeGroup' 'DisableHomeGroup'
-            Svc 'HomeGroupListener' 'demand' '3'
-            Svc 'HomeGroupProvider' 'demand' '3'
-            Opt-Fin 'DRM en linea y Grupo Hogar restaurados'
-        }
-    },
-    @{
         Id = 'ter'; Seccion = 'SERVICIOS Y FUNCIONES QUE CASI NADIE USA'
         Q = '- Desea desactivar Teredo? (Tunel IPv6 que puede sumar latencia; puede afectar el chat de Xbox en PC)'
         Hace = 'apaga Teredo, un tunel de IPv6 que Windows usa por encima de IPv4.'
@@ -4083,7 +4016,7 @@ $ListaOpciones = @(
         }
     },
     @{
-        # v1.0.13: "Telemetria de programas" se dividio en tp (Office), tpn (NVIDIA) y tps (PowerShell 7)
+        # v1.0.13: "Telemetria de programas" se dividio en tp (Office), tpn (NVIDIA) y tps (PowerShell 7). Despues tpn se junto con nvl en nvx.
         Id = 'tp'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
         Q = '- Desea apagar la telemetria de Office? (Si no tenes Office no cambia nada)'
         Hace = 'apaga la telemetria y los comentarios de Office y sus tareas de envio de datos.'
@@ -4111,40 +4044,6 @@ $ListaOpciones = @(
         }
     },
     @{
-        Id = 'tpn'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
-        Q = '- Desea apagar la telemetria de NVIDIA? (Si no tenes placa NVIDIA no cambia nada)'
-        Hace = 'apaga el servicio de telemetria de NVIDIA, sus tareas de envio de datos y la recoleccion de datos del driver y del Panel de control.'
-        Favor = 'menos datos enviados y menos tareas de fondo.'
-        Contra = 'ninguno en el uso normal.'
-        S = {
-            Opt-Ini 'Telemetria de NVIDIA'
-            Svc 'NvTelemetryContainer' 'disabled' '4'
-            Svc-Parar 'NvTelemetryContainer'
-            if (Test-Path -LiteralPath 'HKLM:\SOFTWARE\NVIDIA Corporation') {
-                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID44231' 'REG_DWORD' '0'
-                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID64640' 'REG_DWORD' '0'
-                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID66610' 'REG_DWORD' '0'
-                Reg-Set 'HKLM\SOFTWARE\NVIDIA Corporation\NvControlPanel2\Client' 'OptInOrOutPreference' 'REG_DWORD' '0'
-            }
-            Tarea '\NvTmMon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'disable'
-            Tarea '\NvTmRep_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'disable'
-            Tarea '\NvTmRepOnLogon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'disable'
-            Opt-Fin 'Telemetria de NVIDIA desactivada'
-        }
-        R = {
-            Opt-Ini 'Telemetria de NVIDIA (restaurar)'
-            Svc 'NvTelemetryContainer' 'auto' '2'
-            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID44231'
-            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID64640'
-            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID66610'
-            Reg-Del 'HKLM\SOFTWARE\NVIDIA Corporation\NvControlPanel2\Client' 'OptInOrOutPreference'
-            Tarea '\NvTmMon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'enable'
-            Tarea '\NvTmRep_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'enable'
-            Tarea '\NvTmRepOnLogon_{B2FE1952-0186-46C3-BAEC-A80AA35AC5B8}' 'enable'
-            Opt-Fin 'Telemetria de NVIDIA restaurada'
-        }
-    },
-    @{
         Id = 'tps'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
         Q = '- Desea apagar la telemetria de PowerShell 7? (Si no lo tenes instalado no cambia nada)'
         Hace = 'le pide a PowerShell 7 que no mande datos de uso a Microsoft (variable POWERSHELL_TELEMETRY_OPTOUT).'
@@ -4162,45 +4061,30 @@ $ListaOpciones = @(
         }
     },
     @{
+        # Solo restaurar: Brio ya no toca el archivo hosts. Queda para quien lo aplico con una version vieja
+        # (Herramientas > Quitar el bloqueo de telemetria viejo, y Actualizar Windows lo quita antes de actualizar).
         Id = 'hst'; Seccion = 'PRIVACIDAD Y TELEMETRIA'
-        Q = '- Desea bloquear los servidores de telemetria de Microsoft? (38 entradas en el archivo hosts; Update y Store no se tocan)'
-        Hace = 'anota 38 servidores de telemetria en el archivo hosts para que no respondan.'
-        Favor = 'corta envios de datos aunque Windows reactive algo despues.'
-        Contra = 'Defender a veces avisa por cambios en hosts y algun diagnostico de Microsoft puede fallar.'
-        S = {
-            Opt-Ini 'Bloqueo de servidores de telemetria'
-            $h = Join-Path $env:SystemRoot 'System32\drivers\etc\hosts'
-            if (Hosts-Tiene $h) {
-                $script:OptS++
-                Log 'OK' 'el bloqueo de telemetria ya estaba en el archivo hosts'
-                Opt-Fin 'Servidores de telemetria bloqueados en hosts'
-                return
-            }
-            if (-not (Test-Path -LiteralPath ($h + '.xuca.bak'))) { Copy-Item -LiteralPath $h -Destination ($h + '.xuca.bak') -Force -ErrorAction SilentlyContinue }
-            $txt = "`r`n" + (($HostsTelemetria | ForEach-Object { '0.0.0.0 ' + $_ + ' # xuca-telemetria' }) -join "`r`n") + "`r`n"
-            try { [IO.File]::AppendAllText($h, $txt, [Text.Encoding]::Default) } catch { }
-            Res (Hosts-Tiene $h) 'hosts: bloqueo de telemetria'
-            & ipconfig.exe /flushdns 2>&1 | Out-Null
-            Say '  Si Defender avisa por el archivo hosts, es por estas entradas. Dejalo pasar o usa R para quitarlas.' 'Yellow'
-            Opt-Fin 'Servidores de telemetria bloqueados en hosts'
-        }
+        Q = '- Desea quitar las lineas de telemetria que una version vieja de Brio agrego al archivo hosts?'
+        Hace = 'saca del archivo hosts solo las lineas que agrego una version vieja de Brio y deja el resto como estaba.'
+        Saltar = { (Respuesta 'hst') -ne 'R' }
         R = {
-            Opt-Ini 'Bloqueo de servidores de telemetria (restaurar)'
+            Opt-Ini 'Bloqueo de telemetria de una version vieja (quitar)'
             $h = Join-Path $env:SystemRoot 'System32\drivers\etc\hosts'
             if (-not (Hosts-Tiene $h)) {
                 $script:OptS++
-                Log 'OK' 'no habia entradas de telemetria en hosts'
-                Opt-Fin 'Archivo hosts limpio de entradas de telemetria'
+                Log 'OK' 'no habia lineas de Brio en el archivo hosts'
+                Opt-Fin 'Archivo hosts sin lineas de Brio'
                 return
             }
-            try {
-                $l = @([IO.File]::ReadAllLines($h, [Text.Encoding]::Default) | Where-Object { -not $_.Contains('# xuca-telemetria') })
-                [IO.File]::WriteAllLines($h, [string[]]$l, [Text.Encoding]::Default)
-            } catch { }
-            if (Hosts-Tiene $h) { $script:OptT++; $script:OptF++; Log 'FALLO' 'no se pudieron quitar las entradas de hosts' }
-            else { $script:OptT++; Log 'OK' 'entradas de telemetria quitadas de hosts' }
+            try { [IO.File]::WriteAllLines($h, [string[]](Hosts-SinBrio ([IO.File]::ReadAllLines($h, [Text.Encoding]::Default))), [Text.Encoding]::Default) } catch { }
+            if (Hosts-Tiene $h) { $script:OptT++; $script:OptF++; Log 'FALLO' ('no se pudieron quitar las lineas de Brio del archivo hosts' + (Causa-Error)) }
+            else {
+                $script:OptT++; Log 'OK' 'lineas de Brio quitadas del archivo hosts'
+                # La copia que hacia la version vieja ya no hace falta: el archivo quedo como estaba antes
+                Remove-Item -LiteralPath ($h + '.xuca.bak') -Force -ErrorAction SilentlyContinue
+            }
             & ipconfig.exe /flushdns 2>&1 | Out-Null
-            Opt-Fin 'Archivo hosts limpio de entradas de telemetria'
+            Opt-Fin 'Archivo hosts sin lineas de Brio'
         }
     },
     @{

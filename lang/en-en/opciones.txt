@@ -164,14 +164,14 @@ Favor: Start search only looks in your PC, faster and without ads.
 Contra: Start search no longer searches the internet.
 
 [Debloat sv]
-Titulo: Remove old features
-Hace: turns off Fax, Maps, demo mode, geolocation and error report services, and removes Internet Explorer, Fax and Scan and the old Media Player.
-Favor: fewer services and features loaded in Windows.
-Contra: if you use the Windows scanner or the old Media Player, they're gone.
+Titulo: Turn off rarely used services
+Hace: turns off the Fax, Maps, demo mode, location and error report services. Internet Explorer, Fax and Scan and the old Media Player are removed by "Remove legacy components".
+Favor: fewer services loaded in Windows.
+Contra: you can't send faxes from Windows, apps that use your location can't find it and Windows doesn't collect error reports.
 
 [Debloat rsv]
 Titulo: System services
-Hace: turns off or back on the system services you choose in a list, each with its state (Active, Manual or Off). The Safe ones (Wallet, NFC, mobile hotspot, parental controls, Insider, remote management and others) come checked; the Extreme ones (phone, smart cards, camera, sensors, Wi-Fi Direct, File History, folder sharing, Hyper-V, local network, Remote Desktop, Themes, the NVIDIA container, the compatibility inventory, Windows AI and more) you check yourself and each one says what you lose. You can also turn single services back on: the Off (disabled) ones show in gray and you check them. Only a disabled service counts as off: one on Manual or Active is turned off only when you check it. It never touches the Xbox services, Windows Hello or the PIN.
+Hace: turns off or back on the system services you choose in a list, each with its state (Active, Manual or Off). The Safe ones (Wallet, NFC, mobile hotspot, parental controls, Insider, remote management and others) come checked; the Extreme ones (phone, smart cards, camera, sensors, Wi-Fi Direct, File History, folder sharing, Hyper-V, local network, Remote Desktop, Themes, the NVIDIA container, the compatibility inventory, Windows AI, Windows diagnostics and more) you check yourself and each one says what you lose. You can also turn single services back on: the Off (disabled) ones show in gray and you check them. Only a disabled service counts as off: one on Manual or Active is turned off only when you check it. It never touches the Xbox services, Windows Hello or the PIN.
 Favor: fewer services loaded: frees some RAM and background processes.
 Contra: each service you turn off removes its feature (the list says which). Restore puts each one back as it was before.
 
@@ -180,12 +180,6 @@ Titulo: Turn off the Xbox services
 Hace: turns off the Xbox Live services: sign-in, cloud saves, Xbox networking and Xbox accessories. It doesn't touch Gaming Services.
 Favor: a few MB less: these services are almost always stopped if you don't use Xbox.
 Contra: Game Pass, Minecraft (Bedrock and the Launcher), Store games with cloud saves, Xbox chat and Xbox controller settings stop working until you reset it.
-
-[Debloat dia]
-Titulo: Diagnostics on manual
-Hace: sets the Diagnostic Policy Service (DPS) to manual; it also starts the diagnostic hosts and the resource usage monitor.
-Favor: one to three fewer background processes: a few tens of MB of RAM (estimated, not measured).
-Contra: Windows stops detecting problems on its own, and app history, battery usage per app and data usage per app in Settings stop updating. If a troubleshooter says the diagnostic service isn't running, reset this option.
 
 [Debloat svh]
 Titulo: Group service processes
@@ -204,12 +198,6 @@ Titulo: Turn off Windows location
 Hace: turns off the Windows location service (lfsvc) and apps' and web pages' access to your location.
 Favor: more privacy and one less background service.
 Contra: apps that use location, like weather, maps or Find my device, can't detect it.
-
-[Debloat pvw]
-Titulo: Turn off Wifi Sense
-Hace: turns off Wifi Sense: Windows stops connecting by itself to suggested open Wi-Fi networks and reporting data about Wi-Fi hotspots.
-Favor: your PC doesn't connect by itself to unknown public networks.
-Contra: none in normal use.
 
 [Debloat pvs]
 Titulo: Turn off cloud settings sync
@@ -235,12 +223,6 @@ Hace: turns off the automatic download and update of offline maps and the networ
 Favor: fewer background downloads.
 Contra: the offline maps you downloaded don't update by themselves.
 
-[Debloat pvl]
-Titulo: Turn off Windows Media online DRM
-Hace: stops the old Windows Media Player from looking up licenses for protected music and video online, and blocks HomeGroup (an old feature Windows 10 and 11 no longer include; it's blocked in case something is left).
-Favor: fewer background connections from old features.
-Contra: old protected (DRM) music or videos may not play in the old Media Player.
-
 [Debloat ter]
 Titulo: Disable Teredo
 Hace: turns off Teredo, an IPv6 tunnel Windows uses on top of IPv4.
@@ -253,23 +235,11 @@ Hace: turns off Office telemetry and feedback and its data-sending tasks.
 Favor: less data sent and fewer background tasks.
 Contra: none in normal use.
 
-[Debloat tpn]
-Titulo: Turn off NVIDIA telemetry
-Hace: turns off the NVIDIA telemetry service, its data-sending tasks and the data collection of the driver and the Control Panel.
-Favor: less data sent and fewer background tasks.
-Contra: none in normal use.
-
 [Debloat tps]
 Titulo: Turn off PowerShell 7 telemetry
 Hace: tells PowerShell 7 not to send usage data to Microsoft (POWERSHELL_TELEMETRY_OPTOUT variable).
 Favor: less data sent.
 Contra: none in normal use.
-
-[Debloat hst]
-Titulo: Block telemetry in hosts
-Hace: adds 38 telemetry servers to the hosts file so they don't respond.
-Favor: cuts data sending even if Windows turns something back on later.
-Contra: Defender sometimes warns about hosts changes and some Microsoft diagnostics may fail.
 
 [Debloat eb]
 Titulo: Reduce browser bloat
@@ -382,11 +352,11 @@ Titulo: Turn off microphone audio enhancements
 Hace: turns off Windows audio enhancements on your active microphones (the same switch as Settings, System, Sound, microphone Properties).
 Favor: your voice reaches Discord, OBS or the game unprocessed, with no clipping or volume changes; best if you already use the app's noise filter.
 Contra: you lose the noise cancellation and the effects from Windows or the microphone maker.
-[Gaming mm]
-Titulo: Game priority
-Hace: the Windows multimedia scheduler gives games more priority. The network limit stays at 10, the Windows value, because removing it can make latency worse.
-Favor: a bit more CPU for the game and less stutter.
-Contra: the effect is small.
+[Gaming pj]
+Titulo: Game priority (small effect)
+Hace: gives the game a bit more processor in two ways: the window you're in gets longer turns and goes ahead of background programs (Win32PrioritySeparation = 38), and the Windows multimedia scheduler (MMCSS) gives games more CPU and priority. The network limit stays at 10, the Windows value, because removing it can make latency worse.
+Favor: the game can respond a bit more evenly when there are programs open in the background.
+Contra: the effect is small: on many PCs you won't notice it. Background programs (downloads, browser) run a bit slower while you play.
 
 [Gaming pri]
 Titulo: Give your games high priority
@@ -444,7 +414,7 @@ Contra: you lose Windows captures and clips (you can use NVIDIA, AMD or OBS), Xb
 
 [Gaming notif]
 Titulo: Disable Windows notifications
-Hace: turns off pop-up notifications and the Notification Center.
+Hace: turns off pop-up notifications from Windows and apps. It doesn't touch the Notification Center or the clock calendar: "Remove the calendar from the clock" in Debloat does that.
 Favor: nothing covers your screen in a match.
 Contra: you don't see notifications from apps like Discord or email, or Xbox invites to games or parties. It doesn't help if an app comes to the front on its own (an update or a window from Discord, Brave or Spotify): that isn't a notification and can still happen.
 
@@ -568,12 +538,6 @@ Hace: turns off Windows Memory integrity (aka Core Isolation / HVCI).
 Favor: more FPS in some games.
 Contra: less protection against malicious drivers. If you have Riot Vanguard, it gets removed: RESTART THE PC WITHOUT FAIL before reinstalling it (or opening VALORANT or LoL), or errors and install loops can happen.
 
-[Gaming avl]
-Titulo: Lighter antivirus
-Hace: limits Defender scans to 5 percent of CPU, with low priority.
-Favor: if a scan starts while you play, it uses less processor and gets in the way less.
-Contra: scans take longer to finish.
-
 [Gaming vbs]
 Titulo: Disable VBS
 Hace: turns off virtualization-based security (aka Virtualization-Based Security).
@@ -616,12 +580,6 @@ Hace: lowers the wait when opening menus from 400 to 0 ms.
 Favor: Windows feels faster.
 Contra: none.
 
-[Gaming v4]
-Titulo: Prefer IPv4 over IPv6
-Hace: Windows uses IPv4 before IPv6 when both are available.
-Favor: it can lower latency with some servers.
-Contra: almost none; IPv6 keeps working.
-
 # ============================================================
 # LIMPIEZA
 # ============================================================
@@ -650,10 +608,10 @@ Hace: turns off the printing services (print spooler and printer notifications).
 Favor: fewer programs running in the background and a bit of RAM freed.
 Contra: you can't print or save to PDF from Print until you restore it.
 
-[Debloat nvl]
-Titulo: Turn off NVIDIA extras
-Hace: sets to manual and stops the service used by the NVIDIA app, the overlay and ShadowPlay recording, and turns off the one that sends usage data plus the tasks that look for drivers and updates. It doesn't touch the display service: without it the NVIDIA Control Panel doesn't open and colors and G-Sync aren't kept.
-Favor: fewer NVIDIA processes open and a bit of RAM freed, without losing the driver.
+[Debloat nvx]
+Titulo: Turn off NVIDIA extras and telemetry
+Hace: sets to manual and stops the service used by the NVIDIA app, the overlay and ShadowPlay recording; turns off the telemetry service, the data collection of the driver and the Control Panel, and the tasks that send usage data and look for drivers and updates. It doesn't touch the display service: without it the NVIDIA Control Panel doesn't open and colors and G-Sync aren't kept.
+Favor: fewer NVIDIA processes open, a bit of RAM freed and less data sent, without losing the driver.
 Contra: the overlay, ShadowPlay and the NVIDIA app filters don't work until the service runs. If the app doesn't open well, restore the option. You update the drivers yourself.
 
 [Debloat nvt]
@@ -812,11 +770,6 @@ Hace: turns off the clip capture and recording of Xbox Game Bar (Game DVR), whic
 Favor: if background recording was on, it stops using CPU, GPU and disk while you play (less stutter); if it was off, almost nothing changes.
 Contra: you can't record clips with Win+Alt+G or with the Game Bar.
 
-[Gaming fgb]
-Titulo: More CPU for the active window
-Hace: changes how Windows splits processor time (Win32PrioritySeparation = 38): the window you're in, such as the game, gets longer turns and goes ahead of background programs.
-Favor: the game responds more evenly when there are programs open in the background.
-Contra: background programs (downloads, browser) run a bit slower while you play.
 
 [Limpieza CLEAN_OLD]
 Titulo: Delete the Windows.old folder
