@@ -483,8 +483,6 @@ en: : update Windows.
 es: "Windows 10 2004 o mas nuevo. Tenes "
 en: "Windows 10 2004 or newer. You have "
 
-es: "Windows 10 u 11. Tenes "
-en: "Windows 10 or 11. You have "
 es: "tenes "
 en: "you have "
 

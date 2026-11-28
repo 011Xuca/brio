@@ -12,14 +12,6 @@ $ErrorActionPreference = 'SilentlyContinue'
 $s32 = Join-Path $env:SystemRoot 'System32'
 if ((';' + $env:Path + ';') -notlike ('*;' + $s32 + ';*')) { $env:Path = $s32 + ';' + $env:Path }
 
-# Windows 7 no trae estos comandos (llegaron con Windows 8) y ahi no hay apps de la Store ni tareas nuevas.
-# Se responden vacios: si faltaran, la limpieza y el resumen final se cortarian a la mitad.
-if ([Environment]::OSVersion.Version -lt [version]'6.2') {
-    foreach ($c in 'Get-AppxPackage', 'Get-AppxProvisionedPackage', 'Get-ScheduledTask') {
-        if (-not (Get-Command $c -ErrorAction SilentlyContinue)) { Set-Item -Path ('function:' + $c) -Value { } }
-    }
-}
-
 # Estado de la corrida
 $XSalida = $null            # lo que la app lee para mostrar el progreso
 $XLog = $null               # archivo de log
@@ -952,7 +944,7 @@ function Respuesta([string]$id) {
 #   Saltar (opcional): devuelve $true si la opcion no va en esta PC (ya anota el motivo)
 # ------------------------------------------------------------
 function Correr-Opciones {
-    param([string]$Nombre, [string]$Titulo, $Lista, [string[]]$Rein, [string[]]$Win10, [string]$Salida, [string]$Carpeta)
+    param([string]$Nombre, [string]$Titulo, $Lista, [string[]]$Rein, [string]$Salida, [string]$Carpeta)
     $enc = [Text.Encoding]::GetEncoding(850)
     $fs = $null
     try {
@@ -974,9 +966,7 @@ function Correr-Opciones {
         Reparar-Licencia
 
         Say ($Titulo + ' - build detectado: ' + $script:Build)
-        $viejo = ($script:Build -gt 0) -and ($script:Build -lt 10240)
-        if ($viejo) { Say 'Nota: tenes Windows 7 u 8. Las opciones que necesitan Windows 10 u 11 se saltean solas.' }
-        elseif (($script:Build -gt 0) -and ($script:Build -lt 22000)) { Say 'Nota: esto esta pensado para Windows 11, en Windows 10 algunas opciones pueden no existir o fallar.' }
+        if (($script:Build -gt 0) -and ($script:Build -lt 22000)) { Say 'Nota: esto esta pensado para Windows 11, en Windows 10 algunas opciones pueden no existir o fallar.' }
         Say ('Cada cambio se verifica y queda anotado en: ' + $script:XLog)
 
         # Para el resumen final de la app: espacio libre y apps instaladas antes de tocar nada (solo cuando la app lee la salida)
@@ -990,14 +980,6 @@ function Correr-Opciones {
         $sec = ''
         foreach ($o in $Lista) {
             if ($o.Seccion -ne $sec) { $sec = $o.Seccion; Say ''; Say ''; Say ('=== ' + $sec + ' ===') }
-            # Windows 7 y 8: lo que necesita Windows 10 u 11 no se corre (ni su Saltar/Antes/N); si la habias marcado, se avisa
-            if ($viejo -and (@($Win10) -contains $o.Id)) {
-                if (((Respuesta $o.Id) -ne 'N') -or ($script:XConsola -and $o.Preguntar)) {
-                    Say ''; Say ([string]$o.Q); Say '  Omitido: necesita Windows 10 u 11, en tu Windows no existe.'
-                    Log 'OMITIDO' ($o.Id + ' - necesita Windows 10 u 11 (build ' + $script:Build + ')')
-                }
-                continue
-            }
             if ($o.Saltar -and (& $o.Saltar)) { continue }
             # Avisos que van antes de la pregunta
             if ($o.Antes) { foreach ($l in @(& $o.Antes)) { Say ([string]$l) 'Yellow' } }

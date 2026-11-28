@@ -13,11 +13,6 @@
 # Las opciones que salieron de dividir una que pedia reiniciar (ad -> bng, pv -> pvu...pvl) lo siguen pidiendo igual.
 $ReinDebloat = @('av', 'rc', 'ad', 'bng', 'sv', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'ms_acc', 'al', 'cta')
 
-# Opciones que usan comandos que Windows 7 y 8 no tienen (apps de la Store, Defender nuevo, BitLocker, componentes,
-# dispositivos, cuentas locales, montar el ISO). En esas versiones la app las muestra como no compatibles y aca se saltean.
-# tvb, iap e iao salieron de wg e ia: son de Windows 10 y 11 igual que la opcion de la que vienen.
-$SoloWin10 = @('ver', 'rep', 'av', 'bl', 'mc', 'rc', 'wg', 'tvb', 'sv', 'nvl', 'bt', 'old', 'msx', 'dold', 'dball', 'lang', 'acc', 'ia', 'iap', 'iao', 'db', 'edge', 'drv', 'ms_acc', 'al', 'cta')
-
 # Tareas de telemetria (opcion "Reducir la telemetria")
 $TareasTelemetria = @(
     '\Microsoft\Windows\Application Experience\ProgramDataUpdater',
@@ -4545,7 +4540,7 @@ $ListaOpciones = @(
 # Lo que llama la app (en otro hilo, con Comun.ps1 cargado). $salida = archivo donde la app lee el progreso.
 function Correr-Debloat([string]$salida, [string]$carpeta) {
     $script:RpApagado = $false; $script:ModoCuenta = $false
-    Correr-Opciones -Nombre 'debloat' -Titulo 'WINDOWS DEBLOAT' -Lista @($ListaOpciones | Where-Object { $_.Id -ne 'cta' }) -Rein $ReinDebloat -Win10 $SoloWin10 -Salida $salida -Carpeta $carpeta
+    Correr-Opciones -Nombre 'debloat' -Titulo 'WINDOWS DEBLOAT' -Lista @($ListaOpciones | Where-Object { $_.Id -ne 'cta' }) -Rein $ReinDebloat -Salida $salida -Carpeta $carpeta
 }
 
 # Ventana de PowerShell a la vista, para lo que te pide datos:
@@ -4557,7 +4552,7 @@ function Correr-DebloatConsola([string]$modo, [string]$carpeta) {
     $script:ModoCuenta = ($modo -eq 'cta')
     try { $Host.UI.RawUI.WindowTitle = ('Br' + [string][char]0xED + 'o') } catch { }
     $ids = $(if ($script:ModoCuenta) { @('cta') } else { @('rp', 'ver', 'ms_acc', 'al') })
-    Correr-Opciones -Nombre 'debloat' -Titulo 'WINDOWS DEBLOAT' -Lista @($ListaOpciones | Where-Object { $ids -contains $_.Id }) -Rein $ReinDebloat -Win10 $SoloWin10 -Salida '' -Carpeta $carpeta
+    Correr-Opciones -Nombre 'debloat' -Titulo 'WINDOWS DEBLOAT' -Lista @($ListaOpciones | Where-Object { $ids -contains $_.Id }) -Rein $ReinDebloat -Salida '' -Carpeta $carpeta
     if ($script:ModoCuenta -and $script:Reinicio) {
         Write-Host ''
         if ((Read-Host 'Desea reiniciar ahora? [S] Si  [N] No') -match '^[sS]') {

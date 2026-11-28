@@ -64,6 +64,7 @@ Todo lo que cambió en cada versión de **Brío**. La más nueva va arriba.
 - **Debloat, Interfaz y comodidad: Clic derecho clásico** (nueva, solo Windows 11, no está en ningún perfil): el clic derecho del Explorador y del escritorio vuelve a mostrar el menú completo, sin "Mostrar más opciones". Cambia solo tu usuario (una clave en `HKCU\Software\Classes\CLSID`) y reinicia el Explorador; Restablecer borra esa clave. En Windows 10 sale en gris.
 
 ### Cambios
+- **Brío ahora requiere Windows 10 o 11**; se quitó el soporte de Windows 7 y 8.1.
 - **Textos sin promesas de más**: **Apagar la grabación de juegos** ya no promete "más FPS" (solo ayuda si la grabación en segundo plano estaba prendida), **Desactivar VBS** dice "hasta 5 a 10 % en algunos juegos" en vez de prometerlo siempre, y **Antivirus con menos CPU** ya no dice que los análisis no bajan FPS.
 - **Se quitó "Apagar el antivirus"** (y de los perfiles **Full Optimizado** y **RAM mínima**): Brío ya no apaga Defender, SmartScreen ni Smart App Control, así el antivirus deja de marcar la app. Si lo apagaste con una versión vieja, **Herramientas > Restaurar el antivirus de Windows** lo vuelve a encender (la Protección contra alteraciones la prendés vos en Seguridad de Windows). **Antivirus con menos CPU** sigue en Zona gamer.
 - **Se quitó "Activar Windows"** de Herramientas.

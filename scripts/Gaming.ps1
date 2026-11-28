@@ -9,11 +9,6 @@
 
 # Opciones que necesitan reiniciar para aplicarse. Solo se pide reiniciar si alguna de estas cambio algo de verdad.
 $ReinGaming = @('tk', 'mm', 'notif', 'gf', 'mpo', 'msi', 'pca', 'tr', 'mi', 'vbs', 'md', 'v4', 'll', 'nag', 'nic', 'dup', 'spc', 'xbt', 'fsm')
-
-# Opciones que usan comandos que Windows 7 y 8 no tienen (tareas programadas nuevas, apps de la Store, DNS por placa,
-# Defender nuevo, dispositivos). En esas versiones la app las muestra como no compatibles y aca se saltean.
-# wgo (juegos en ventana) solo existe en Windows 11.
-$SoloWin10 = @('afi', 'xb', 'xbt', 'fso', 'msi', 'tr', 'ram', 'dns', 'mi', 'avl', 'vbs', 'wgo')
 $GameBarProtocolos = @('ms-gamingoverlay', 'ms-gamebar', 'ms-gamebarservices')
 
 # "Quitar Xbox completo" (xbt): servicios, apps (instaladas y provisionadas) y la tarea de guardado en la nube.
@@ -3762,5 +3757,5 @@ $ListaOpciones = @(
 
 # Lo que llama la app (en otro hilo, con Comun.ps1 cargado). $salida = archivo donde la app lee el progreso.
 function Correr-Gaming([string]$salida, [string]$carpeta) {
-    Correr-Opciones -Nombre 'gaming' -Titulo 'OPTIMIZACION PARA GAMING' -Lista $ListaOpciones -Rein $ReinGaming -Win10 $SoloWin10 -Salida $salida -Carpeta $carpeta
+    Correr-Opciones -Nombre 'gaming' -Titulo 'OPTIMIZACION PARA GAMING' -Lista $ListaOpciones -Rein $ReinGaming -Salida $salida -Carpeta $carpeta
 }

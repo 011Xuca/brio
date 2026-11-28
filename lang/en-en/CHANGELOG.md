@@ -64,6 +64,7 @@ English changelog of **Brío** (the app shows the section of your version when t
 - **Debloat, Interface and comfort: Classic right-click menu** (new, Windows 11 only, not in any profile): right-clicking in File Explorer and on the desktop shows the full menu again, without "Show more options". It only changes your user (a key in `HKCU\Software\Classes\CLSID`) and restarts File Explorer; Restore deletes that key. On Windows 10 it is greyed out.
 
 ### Changes
+- **Brío now requires Windows 10 or 11**; support for Windows 7 and 8.1 was removed.
 - **Texts without overpromising**: **Turn off background game recording** no longer promises "more FPS" (it only helps if background recording was on), **Disable VBS** says "up to 5 to 10 % in some games" instead of promising it always, and **Lighter antivirus** no longer says scans don't lower FPS.
 - **"Turn off the antivirus" was removed** (also from the **Full Optimized** and **Minimum RAM** profiles): Brío no longer turns off Defender, SmartScreen or Smart App Control, so the antivirus stops flagging the app. If you turned it off with an old version, **Tools > Restore the Windows antivirus** turns it back on (you turn Tamper Protection back on yourself in Windows Security). **Lighter antivirus** stays in the Gamer zone.
 - **"Activate Windows" was removed** from Tools.
