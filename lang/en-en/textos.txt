@@ -459,6 +459,9 @@ en: "Windows 11 24H2 or newer. You have "
 es: "Windows 11 (en Windows 10 el calendario del reloj no se puede quitar). Tenes "
 en: "Windows 11 (on Windows 10 the clock calendar can't be removed). You have "
 
+es: "Windows 11 (en Windows 10 el clic derecho ya es el menu clasico). Tenes "
+en: "Windows 11 (on Windows 10 the right-click menu is already the classic one). You have "
+
 es: "Windows 11 (los Widgets no existen en Windows 10). Tenes "
 en: "Windows 11 (Widgets don't exist on Windows 10). You have "
 

@@ -2743,7 +2743,7 @@ $ListaOpciones = @(
         Id = 'dvr'; Seccion = 'MODO JUEGO Y GAME BAR'
         Q = '- Desea apagar la grabacion de juegos en segundo plano? (Game DVR: libera CPU, GPU y disco mientras jugas)'
         Hace = 'apaga la captura y grabacion de clips de Xbox Game Bar (Game DVR), que graba en segundo plano mientras jugas. No borra la Game Bar ni toca Xbox.'
-        Favor = 'mas FPS y menos tirones, sobre todo si la grabacion en segundo plano estaba activa.'
+        Favor = 'si la grabacion en segundo plano estaba activa, deja de usar CPU, GPU y disco mientras jugas (menos tirones); si estaba apagada, casi no cambia.'
         Contra = 'no podes grabar clips con Win+Alt+G ni con la Game Bar.'
         S = {
             Opt-Ini 'Grabacion de juegos (Game DVR)'
@@ -3461,7 +3461,7 @@ $ListaOpciones = @(
         Id = 'avl'; Seccion = 'SEGURIDAD (MAS RENDIMIENTO)'
         Q = '- Desea que el antivirus use menos CPU? (Limita los analisis y sigue encendido)'
         Hace = 'limita los analisis de Defender al 5 por ciento de CPU, con prioridad baja.'
-        Favor = 'los analisis no te bajan FPS.'
+        Favor = 'si un analisis arranca mientras jugas, usa menos procesador y molesta menos.'
         Contra = 'los analisis tardan mas en terminar.'
         Saltar = {
             # Si no marcaste "Antivirus liviano" no se revisa el antivirus
@@ -3486,9 +3486,9 @@ $ListaOpciones = @(
     },
     @{
         Id = 'vbs'; Seccion = 'SEGURIDAD (MAS RENDIMIENTO)'
-        Q = '- Desea desactivar VBS? (5 a 10 por ciento mas en juegos; rompe Docker, WSL y Hyper-V)'
+        Q = '- Desea desactivar VBS? (Hasta 5 a 10 por ciento mas en algunos juegos; rompe Docker, WSL y Hyper-V)'
         Hace = 'apaga la seguridad basada en virtualizacion.'
-        Favor = 'entre 5 y 10 por ciento mas de FPS.'
+        Favor = 'en algunos juegos, sobre todo con procesadores viejos, hasta 5 a 10 por ciento mas de FPS; en otros casi no cambia.'
         Contra = 'deja de andar WSL, Docker, Hyper-V y las maquinas virtuales. Si tenes Riot Vanguard, se borra: REINICIA LA PC SIN FALTA antes de volver a instalarlo (o abrir VALORANT o LoL), o pueden salir errores y bucles de instalacion.'
         S = {
             Opt-Ini 'VBS'

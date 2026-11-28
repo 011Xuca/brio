@@ -91,6 +91,12 @@ Hace: adds End task to the taskbar right-click menu.
 Favor: you close a frozen game or program without opening Task Manager.
 Contra: none.
 
+[Debloat cmc]
+Titulo: Classic right-click menu
+Hace: on Windows 11, right-clicking in File Explorer and on the desktop shows the full classic menu again, without having to click "Show more options". It only changes your user and restarts File Explorer.
+Favor: you get straight to your programs' options (7-Zip, WinRAR, editors) without an extra click.
+Contra: you lose the new menu with the copy, paste and rename icons at the top. The taskbar flickers for a moment when it's applied.
+
 [Debloat cal]
 Titulo: Remove the calendar from the clock
 Hace: the date and time on the taskbar are still shown, but clicking them no longer opens the calendar or the notification center.
@@ -565,13 +571,13 @@ Contra: less protection against malicious drivers. If you have Riot Vanguard, it
 [Gaming avl]
 Titulo: Lighter antivirus
 Hace: limits Defender scans to 5 percent of CPU, with low priority.
-Favor: scans don't lower your FPS.
+Favor: if a scan starts while you play, it uses less processor and gets in the way less.
 Contra: scans take longer to finish.
 
 [Gaming vbs]
 Titulo: Disable VBS
 Hace: turns off virtualization-based security (aka Virtualization-Based Security).
-Favor: between 5 and 10 percent more FPS.
+Favor: in some games, mostly with older processors, up to 5 to 10 percent more FPS; in others almost nothing changes.
 Contra: WSL, Docker, Hyper-V and virtual machines stop working. If you have Riot Vanguard, it gets removed: RESTART THE PC WITHOUT FAIL before reinstalling it (or opening VALORANT or LoL), or errors and install loops can happen.
 
 [Gaming spc]
@@ -754,9 +760,9 @@ Contra: you can't install or update Store apps (nor Game Pass, Xbox or Minecraft
 
 [Debloat usv]
 Titulo: Turn off per-user services
-Hace: turns off the services Windows starts for each user: contacts and calendar (UserDataSvc, Unistore, PimIndex), sync (OneSync), messages, Connected Devices, user printing and Web Defense. The clipboard service (cbdhsvc) stays on: Snipping Tool and Win+Shift+S need it.
+Hace: turns off the services Windows starts for each user: contacts and calendar (UserDataSvc, Unistore, PimIndex), sync (OneSync), messages, Connected Devices and user printing. The clipboard service (cbdhsvc) stays on: Snipping Tool and Win+Shift+S need it. Web Threat Defense (SmartScreen phishing protection) is not touched either.
 Favor: fewer svchost processes per session and a bit less RAM.
-Contra: the Mail, Calendar and People apps don't sync, Nearby Sharing stops working and Defender web protection doesn't run.
+Contra: the Mail, Calendar and People apps don't sync and Nearby Sharing stops working.
 
 [Debloat dold]
 Titulo: Remove legacy apps
@@ -803,7 +809,7 @@ Contra: IT CAN'T BE RESTORED from the app: if you ever need them (Narrator, voic
 [Gaming dvr]
 Titulo: Turn off background game recording
 Hace: turns off the clip capture and recording of Xbox Game Bar (Game DVR), which records in the background while you play. It doesn't delete the Game Bar or touch Xbox.
-Favor: more FPS and less stutter, mostly if background recording was on.
+Favor: if background recording was on, it stops using CPU, GPU and disk while you play (less stutter); if it was off, almost nothing changes.
 Contra: you can't record clips with Win+Alt+G or with the Game Bar.
 
 [Gaming fgb]
