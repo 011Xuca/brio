@@ -345,8 +345,9 @@ foreach ($r in $Rutas.Values) {
 }
 
 # Opciones que te piden datos en la consola: van en la pagina Herramientas, no como casillas.
-# 'av' solo restaura el antivirus que apagaban las versiones viejas (boton en Herramientas).
-$SoloScript = @('ver', 'rep', 'ms_acc', 'al', 'cta', 'drv', 'rp', 'av')
+# 'av' y 'avl' solo restauran el antivirus y el limite de CPU de sus analisis que cambiaban las versiones viejas (boton en Herramientas).
+# 'hst' solo quita del archivo hosts las lineas que agregaban las versiones viejas (boton en Herramientas y Actualizar Windows).
+$SoloScript = @('ver', 'rep', 'ms_acc', 'al', 'cta', 'drv', 'rp', 'av', 'avl', 'hst')
 
 # "- Desea mouse competitivo? (Sin aceleracion...)" -> "Mouse competitivo"
 function Titulo-Corto([string]$q) {
@@ -359,24 +360,24 @@ function Titulo-Corto([string]$q) {
 # El ingles de cada uno esta en lang\en-en\opciones.txt (Titulo), por el Id.
 $TitulosCortos = @{
     'Debloat|ini' = 'Limpiar arranque'; 'Debloat|db' = 'Apps del Sistema'; 'Debloat|eb' = 'Reducir bloat del navegador'; 'Debloat|rsv' = 'Servicios del Sistema'
-    'Debloat|sv' = 'Quitar funciones viejas'; 'Debloat|apps' = 'Bloquear apps en segundo plano'
+    'Debloat|sv' = 'Apagar servicios poco usados'; 'Debloat|apps' = 'Bloquear apps en segundo plano'
     'Debloat|tel' = 'Reducir la telemetria'
     'Debloat|ofb' = 'Apagar la precarga de Office'; 'Debloat|do' = 'No compartir actualizaciones'; 'Debloat|wud' = 'Sin drivers por Windows Update'
     'Debloat|wup' = 'Pausar actualizaciones por mas tiempo'; 'Debloat|wus' = 'Apagar Windows Update'; 'Debloat|str' = 'Apagar instalaciones de la Store'
-    'Debloat|nvl' = 'Apagar extras de NVIDIA'; 'Debloat|nvt' = 'Quitar el icono de NVIDIA'; 'Debloat|upd' = 'Actualizadores de navegadores en manual'
+    'Debloat|nvx' = 'Apagar extras y telemetria de NVIDIA'; 'Debloat|nvt' = 'Quitar el icono de NVIDIA'; 'Debloat|upd' = 'Actualizadores de navegadores en manual'
     'Debloat|tsk' = 'Apagar tareas de diagnostico'; 'Debloat|fsb' = 'Menos escrituras en disco'; 'Debloat|sud' = 'Programas de inicio sin espera'
     'Debloat|thm' = 'Iconos en vez de miniaturas'; 'Debloat|old' = 'Quitar componentes viejos'; 'Debloat|usv' = 'Apagar servicios de usuario'
     'Debloat|tkb' = 'Apagar cuentas web'; 'Debloat|cdps' = 'Apagar Dispositivos conectados'
     'Debloat|dold' = 'Borrar apps antiguas'; 'Debloat|dball' = 'Borrar apps modernas'; 'Debloat|rbs' = 'Borrar respaldos de actualizaciones'
     'Debloat|drs' = 'Borrar drivers viejos'; 'Debloat|wre' = 'Borrar el entorno de recuperacion'; 'Debloat|lang' = 'Borrar idiomas sin usar'
-    'Debloat|acc' = 'Borrar accesibilidad y voz'; 'Debloat|dia' = 'Diagnostico en manual'; 'Debloat|svh' = 'Juntar procesos de servicios'
-    'Debloat|hst' = 'Bloquear telemetria en hosts'; 'Debloat|su' = 'Frenar actualizaciones de la Store'; 'Debloat|cam' = 'Camara compartida'
+    'Debloat|acc' = 'Borrar accesibilidad y voz'; 'Debloat|svh' = 'Juntar procesos de servicios'
+    'Debloat|su' = 'Frenar actualizaciones de la Store'; 'Debloat|cam' = 'Camara compartida'
     'Debloat|edge' = 'Quitar Edge y Bing'; 'Debloat|et' = 'Finalizar tarea en la barra'; 'Debloat|cmc' = 'Clic derecho clasico'
     'Gaming|cpu' = 'Modo Nitro'; 'Gaming|tr' = 'Temporizador del sistema'; 'Gaming|mi' = 'Desactivar integridad de memoria'
-    'Gaming|fgb' = 'Mas CPU a la ventana activa'; 'Gaming|mm' = 'Prioridad para juegos'; 'Gaming|afi' = 'Afinidad de CPU'
+    'Gaming|pj' = 'Prioridad para juegos (efecto chico)'; 'Gaming|afi' = 'Afinidad de CPU'
     'Gaming|idle' = 'Nucleos siempre despiertos'; 'Gaming|fso' = 'Sin optimizacion de pantalla completa'; 'Gaming|msi' = 'Modo MSI'
     'Gaming|pca' = 'Apagar el Asistente de compatibilidad'; 'Gaming|ram' = 'Limpieza automatica de RAM'; 'Gaming|dsk' = 'Discos siempre encendidos'
-    'Gaming|nag' = 'Paquetes sin espera (Nagle)'; 'Gaming|dns' = 'DNS mas rapido'; 'Gaming|avl' = 'Antivirus con menos CPU'
+    'Gaming|nag' = 'Paquetes sin espera (Nagle)'; 'Gaming|dns' = 'DNS mas rapido'
     'Gaming|spc' = 'Desactivar Spectre y Meltdown'; 'Gaming|du' = 'Volumen fijo en llamadas'; 'Gaming|mae' = 'Mejoras de audio del microfono'; 'Gaming|tk' = 'Sin atajos de accesibilidad'
     'Gaming|md' = 'Menus sin retraso'; 'Gaming|dtk' = 'Destrabar teclado'; 'Gaming|foc' = 'Modo foco'; 'Gaming|fsm' = 'Modo foco sin programa (antitrampas)'; 'Gaming|vpf' = 'Velocidad del puntero fija'; 'Gaming|esc' = 'Escala segun la resolucion'
 }
@@ -787,7 +788,15 @@ $Chequeos = @{
     'Debloat|wre' = { Test-Path -LiteralPath (Join-Path $env:ProgramData 'Brio\sv_wre.txt') }
     'Debloat|lang' = { Test-Path -LiteralPath (Join-Path $env:ProgramData 'Brio\sv_lang.txt') }
     'Debloat|acc'  = { Test-Path -LiteralPath (Join-Path $env:ProgramData 'Brio\sv_acc.txt') }
-    'Debloat|nvl'   = { $v = Leer-Svc 'NvContainerLocalSystem'; if ($null -eq $v) { return $true }; $v -ge 3 }
+    # Junta nvl (contenedor) y tpn (telemetria): sin NVIDIA no hay nada que apagar. Con una sola parte (la opcion vieja) sale "Desactualizada"
+    'Debloat|nvx'   = {
+        $v = Leer-Svc 'NvContainerLocalSystem'
+        $ext = (($null -eq $v) -or ($v -ge 3))
+        $tel = ((-not (Test-Path -LiteralPath 'HKLM:\SOFTWARE\NVIDIA Corporation')) -or ((Leer-Reg 'HKLM:\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID44231') -eq 0))
+        if ($ext -and $tel) { return $true }
+        if ($ext -or $tel) { return 'vieja' }
+        $false
+    }
     'Debloat|nvt'   = { (Leer-Reg 'HKLM:\SOFTWARE\NVIDIA Corporation\NvTray' 'StartOnLogin') -eq 0 }
     'Debloat|upd'   = {
         $v = @('edgeupdate', 'gupdate', 'brave' | ForEach-Object { Leer-Svc $_ } | Where-Object { $null -ne $_ })
@@ -805,7 +814,6 @@ $Chequeos = @{
     'Debloat|rap'   = { ((Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control' 'WaitToKillServiceTimeout') -eq '2000') }
     'Debloat|sud'   = { (Leer-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Serialize' 'StartupDelayInMSec') -eq 0 }
     'Debloat|xbs'   = { ((Leer-Svc 'XblAuthManager') -eq 4) -and ((Leer-Svc 'XblGameSave') -eq 4) }
-    'Debloat|dia'   = { (Leer-Svc 'DPS') -eq 3 }
     'Debloat|mc'    = { [bool](Get-MMAgent -ErrorAction Stop).MemoryCompression -and ((Leer-Svc 'SysMain') -ne 4) }
     'Debloat|tim'   = { (Leer-Svc 'TextInputManagementService') -eq 4 }
     'Debloat|tkb'   = { (Leer-Svc 'TokenBroker') -eq 4 }
@@ -819,18 +827,13 @@ $Chequeos = @{
     'Debloat|svh'   = { (Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control' 'SvcHostSplitThresholdInKB') -eq 67108864 }
     'Debloat|pv'    = { (Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' 'EnableActivityFeed') -eq 0 }
     'Debloat|pvu'   = { (Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' 'DisableLocation') -eq 1 }
-    'Debloat|pvw'   = { (Leer-Reg 'HKLM:\SOFTWARE\Microsoft\WcmSvc\wifinetworksettings' 'AutoConnectAllowedOEM') -eq 0 }
     'Debloat|pvs'   = { (Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\SettingSync' 'DisableSettingSync') -eq 2 }
     'Debloat|pve'   = { (Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization' 'AllowInputPersonalization') -eq 0 }
     'Debloat|pvv'   = { ((Leer-Reg 'HKCU:\Software\Microsoft\Speech_OneCore\Settings\VoiceActivation\UserPreferenceForAllApps' 'AgentActivationEnabled') -eq 0) -and ((Leer-Reg 'HKCU:\Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy' 'HasAccepted') -eq 0) }
     'Debloat|pvm'   = { (Leer-Reg 'HKLM:\SYSTEM\Maps' 'AutoUpdateEnabled') -eq 0 }
-    'Debloat|pvl'   = { (Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\WMDRM' 'DisableOnline') -eq 1 }
     'Debloat|ter'   = { (Leer-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\TCPIP\v6Transition' 'Teredo_State') -eq 'Disabled' }
     'Debloat|tp'    = { (Leer-Reg 'HKCU:\Software\Policies\Microsoft\office\16.0\common\clienttelemetry' 'DisableTelemetry') -eq 1 }
-    # Sin NVIDIA no hay nada que apagar (igual que 'nvl')
-    'Debloat|tpn'   = { if (-not (Test-Path -LiteralPath 'HKLM:\SOFTWARE\NVIDIA Corporation')) { return $true }; (Leer-Reg 'HKLM:\SOFTWARE\NVIDIA Corporation\Global\FTS' 'EnableRID44231') -eq 0 }
     'Debloat|tps'   = { (Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' 'POWERSHELL_TELEMETRY_OPTOUT') -eq '1' }
-    'Debloat|hst'   = { [bool](Select-String -LiteralPath (Join-Path $env:SystemRoot 'System32\drivers\etc\hosts') -SimpleMatch -Pattern '# xuca-telemetria' -Quiet) }
     # Edge y Brave en una sola opcion: aplicada cuando cada navegador instalado ya tiene sus politicas (lo marcado con las opciones viejas eb y ebb cuenta igual: son las mismas claves)
     'Debloat|eb'    = {
         $nv = @(Navegadores-Instalados)
@@ -855,7 +858,14 @@ $Chequeos = @{
     'Gaming|tk'     = { (Leer-Reg 'HKCU:\Control Panel\Accessibility\StickyKeys' 'Flags') -eq '506' }
     'Gaming|du'     = { (Leer-Reg 'HKCU:\Software\Microsoft\Multimedia\Audio' 'UserDuckingPreference') -eq 3 }
     'Gaming|mae'    = { $b = 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Capture\'; $m = @(Get-ChildItem $b -ErrorAction SilentlyContinue | Where-Object { (Get-ItemProperty -LiteralPath $_.PSPath -ErrorAction SilentlyContinue).DeviceState -eq 1 }); ($m.Count -gt 0) -and (@($m | Where-Object { (Get-ItemProperty -LiteralPath ($_.PSPath + '\FxProperties') -ErrorAction SilentlyContinue).'{1da5d803-d492-4edd-8c23-e0c0ffee7f0e},5' -ne 1 }).Count -eq 0) }
-    'Gaming|mm'     = { ((Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games' 'Scheduling Category') -eq 'High') -and ((Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' 'SystemResponsiveness') -eq 10) }
+    # Junta fgb (ventana activa) y mm (MMCSS): con una sola parte (la opcion vieja) sale "Desactualizada"
+    'Gaming|pj'     = {
+        $fg = ((Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl' 'Win32PrioritySeparation') -eq 38)
+        $mm = ((Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games' 'Scheduling Category') -eq 'High') -and ((Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' 'SystemResponsiveness') -eq 10)
+        if ($fg -and $mm) { return $true }
+        if ($fg -or $mm) { return 'vieja' }
+        $false
+    }
     'Gaming|pri'    = { (Prio-Actuales).Count -gt 0 }
     'Gaming|afi'    = { Prog-Estado 'BrioAfinidad' 'BrioAfinidad.exe' $CodAfi }
     'Gaming|pw'     = { $global:XPlan -eq '8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c' }
@@ -869,7 +879,6 @@ $Chequeos = @{
     'Gaming|nb'     = { if (-not $global:XPlan) { return $null }; Test-Path -LiteralPath (Join-Path $env:ProgramData ('Brio\nb_' + $global:XPlan + '.txt')) }
     'Gaming|ll'     = { (Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\FeatureManagement\Overrides\8\1213986446' 'EnabledState') -eq 2 }
     'Gaming|idle'   = { if (-not $global:XPlan) { return $null }; (Leer-Reg ('HKLM:\SYSTEM\CurrentControlSet\Control\Power\User\PowerSchemes\' + $global:XPlan + '\54533251-82be-4824-96c1-47b60b740d00\5d76a2ca-e8c0-402f-a133-2158492d58ad') 'ACSettingIndex') -eq 1 }
-    'Gaming|fgb'    = { (Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl' 'Win32PrioritySeparation') -eq 38 }
     'Gaming|dvr'    = { ((Leer-Reg 'HKCU:\System\GameConfigStore' 'GameDVR_Enabled') -eq 0) -and ((Leer-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\GameDVR' 'AppCaptureEnabled') -eq 0) }
     'Gaming|gm'     = { ((Leer-Reg 'HKCU:\Software\Microsoft\GameBar' 'AutoGameModeEnabled') -eq 1) -and ((Leer-Reg 'HKCU:\Software\Microsoft\GameBar' 'AllowAutoGameMode') -eq 1) }
     'Gaming|xb'     = { if ($global:XCpuClase -eq 'x3d') { (Leer-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\GameDVR' 'AppCaptureEnabled') -eq 0 } else { -not (HasAppx 'Microsoft.XboxGamingOverlay') } }
@@ -924,7 +933,6 @@ $Chequeos = @{
     }
     'Gaming|dns'    = { @(Get-ChildItem -LiteralPath (Join-Path $env:ProgramData 'Brio') -Filter 'dns_*.txt' -ErrorAction SilentlyContinue).Count -gt 0 }
     'Gaming|mi'     = { (Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity' 'Enabled') -eq 0 }
-    'Gaming|avl'    = { (Get-MpPreference -ErrorAction Stop).ScanAvgCPULoadFactor -eq 5 }
     'Gaming|vbs'    = { (Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard' 'EnableVirtualizationBasedSecurity') -eq 0 }
     'Gaming|spc'    = { ((Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 'FeatureSettingsOverride') -eq 3) -and ((Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management' 'FeatureSettingsOverrideMask') -eq 3) }
     'Gaming|wsr'    = { (Leer-Svc 'WSearch') -eq 4 }
@@ -932,7 +940,6 @@ $Chequeos = @{
     'Gaming|ext'    = { (Leer-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'HideFileExt') -eq 0 }
     'Gaming|hid'    = { (Leer-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' 'Hidden') -eq 1 }
     'Gaming|md'     = { (Leer-Reg 'HKCU:\Control Panel\Desktop' 'MenuShowDelay') -eq '0' }
-    'Gaming|v4'     = { (Leer-Reg 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters' 'DisabledComponents') -eq 32 }
 }
 # Contador "N/M apagados" de "Servicios del Sistema": sale de los servicios que existen en esta PC (lista de Debloat.ps1)
 # Contador de "Apps del Sistema": las apps basura + las extras del submenu (Paint, Camara, protegidas opcionales...): lista y contador salen de lo mismo
@@ -952,7 +959,7 @@ $ErrorActionPreference = 'Stop'
 . ([scriptblock]::Create($Funcs))
 $res = @{}
 $Sync.Lock = New-Object object
-# Lo lento (apps, Defender, discos, placas de red, juegos, procesador) corre en varios hilos a la vez:
+# Lo lento (apps, discos, placas de red, juegos, procesador) corre en varios hilos a la vez:
 # cada hilo hace su parte y suma a $Sync.Hecho, asi la barra avanza igual que antes pero termina antes.
 $Previo = {
     param($Funcs, $Sync, $Plan)
@@ -980,7 +987,7 @@ $Chequear = {
     $out
 }
 $Compat = {
-        $i = @{ Build = 0; Ubr = 0; Display = ''; Edicion = ''; RamGB = 0; Hdd = $false; Recall = $false; BitLocker = $false; Winget = $false; AvOff = $false }
+        $i = @{ Build = 0; Ubr = 0; Display = ''; Edicion = ''; RamGB = 0; Hdd = $false; Recall = $false; BitLocker = $false; Winget = $false }
         try { $i.Build = [int](Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' 'CurrentBuildNumber') } catch { }
         try { $i.Ubr = [int](Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' 'UBR') } catch { }
         $i.Display = [string](Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' 'DisplayVersion')
@@ -1079,11 +1086,6 @@ $Compat = {
             }
         } catch { }
         Lap 'Compat: procesador X3D'
-        try {
-            $sv = Get-Service -Name WinDefend -ErrorAction SilentlyContinue
-            $i.AvOff = (-not $sv) -or ($sv.Status -ne 'Running') -or ((Get-MpComputerStatus -ErrorAction Stop).RealTimeProtectionEnabled -eq $false)
-        } catch { }
-        Lap 'Compat: Defender'
         # Spectre y Meltdown: si el procesador no tiene activas esas protecciones (no esta afectado) la opcion no sirve.
         # Si ya las apago la app (FeatureSettingsOverride = 3), el kernel las muestra apagadas pero la opcion sigue disponible.
         $i.SpecLeido = $false; $i.SpecActivas = $false; $i.SpecApagadas = $false
@@ -2655,7 +2657,6 @@ $Advertencias = @{
     'Debloat|bl'   = 'Descifrar el disco puede tardar bastante en segundo plano. Si cambia algo, borra Riot Vanguard. REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.'
     'Debloat|db'   = 'No tiene restablecimiento las apps borradas se reinstalan a mano desde la Store.'
     'Debloat|edge' = 'Si no tenes otro navegador, te quedas sin uno. Una actualizacion grande de Windows puede traerlo de vuelta.'
-    'Debloat|hst'  = 'Defender a veces lo marca como amenaza porque toca el archivo hosts. Puede impedir actualizar a Windows 11 26H2: bloquea el servidor de compatibilidad que Windows Update consulta antes de ofrecerla.'
     'Debloat|ter'  = 'Puede romper el chat de grupo de Xbox y el NAT en juegos de Xbox en PC.'
     'Debloat|xbs'  = 'Game Pass, Minecraft y el guardado en la nube de los juegos de la Store dejan de andar hasta que la restablezcas.'
     'Debloat|bt'   = 'Auriculares, mouse, teclado y joysticks Bluetooth dejan de andar hasta que lo restablezcas.'
@@ -2671,7 +2672,7 @@ $Advertencias = @{
     'Debloat|msx'  = 'PELIGRO: sin la Store no instalas ni actualizas apps de la Store, Game Pass ni Minecraft. Se reinstala con wsreset -i (hace falta internet).'
     'Debloat|usv'  = 'Correo, Calendario y Contactos dejan de sincronizar y Compartir cerca no anda. La captura de pantalla (Recortes y Win+Shift+S) sigue andando: el portapapeles ya no se apaga.'
     'Debloat|rmin' = 'No vas a poder imprimir ni guardar en PDF desde Imprimir hasta que lo restablezcas.'
-    'Debloat|nvl'  = 'El overlay, ShadowPlay y los filtros de la NVIDIA App dejan de andar. Si la NVIDIA App no abre bien, restablecelo.'
+    'Debloat|nvx'  = 'El overlay, ShadowPlay y los filtros de la NVIDIA App dejan de andar. Si la NVIDIA App no abre bien, restablecelo.'
     'Gaming|xbt'   = 'BORRA XBOX ENTERO, Gaming Services incluido: Game Pass, Minecraft Bedrock y su Launcher y los juegos de la Microsoft Store dejan de funcionar y no podes jugar online con tu cuenta Xbox. Restablecer reinstala lo principal con winget, pero algunas cosas se reinstalan a mano.'
     'Gaming|afi'   = 'Algunos antitrampas (Valorant, Fortnite) no dejan cambiar la afinidad: ese juego usa todos los nucleos, pero lo de fondo igual se mueve aparte.'
     'Gaming|foc'   = 'Algunos antitrampas (Valorant/Vanguard, Fortnite, FACEIT) desconfian de los programas que miran el teclado: si un juego te da problemas, restablecelo y usa el Modo foco sin programa.'
@@ -2697,7 +2698,7 @@ $Advertencias = @{
 # Avisos de la tarjeta para opciones que pueden dar problemas con aparatos conectados (no impiden "Marcar solo seguras"):
 # al aplicar, la app mira que tenes conectado y avisa con el nombre del aparato.
 $AdvDisp = @{
-    'Gaming|mm'   = 'Con interfaces de audio o instrumentos MIDI puede cambiar la latencia. Al aplicar, la app te avisa si detecta uno.'
+    'Gaming|pj'   = 'Con interfaces de audio o instrumentos MIDI puede cambiar la latencia. Al aplicar, la app te avisa si detecta uno.'
     'Gaming|tr'   = 'Con interfaces de audio o instrumentos MIDI puede cambiar la latencia. Al aplicar, la app te avisa si detecta uno.'
     'Debloat|drs' = 'Borra los drivers de impresoras, joysticks, camaras o interfaces de audio desenchufados. Al aplicar, la app te avisa si detecta alguno.'
 }
@@ -3087,7 +3088,7 @@ $OrdenSec = @{
 $OrdenOpc = @{
     Debloat = @(
         # Apps y procesos en segundo plano: primero lo que se abre solo y mas RAM ocupa
-        'ini', 'apps', 'svh', 'ofb', 'nvl', 'upd', 'tsk', 'dia', 'nvt',
+        'ini', 'apps', 'svh', 'ofb', 'nvx', 'upd', 'tsk', 'nvt',
         # Efectos visuales y fluidez
         'fx', 'trn', 'thm', 'rap', 'sud',
         # Almacenamiento y memoria
@@ -3101,7 +3102,7 @@ $OrdenOpc = @{
         # Apps, navegadores e IA: borrar apps basura es lo que mas libera
         'db', 'eb', 'ia', 'iap', 'iao', 'rc', 'edge', 'chr',
         # Privacidad y telemetria: primero lo que ademas corre en segundo plano (servicios y tareas)
-        'tel', 'tp', 'tpn', 'tps', 'hst', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'cdp', 'clh', 'wer',
+        'tel', 'tp', 'tps', 'pv', 'pvu', 'pvs', 'pve', 'pvv', 'pvm', 'cdp', 'clh', 'wer',
         # Interfaz y comodidad
         'ad', 'bng', 'wg', 'tvb', 'et', 'cmc', 'cal', 'sch', 'sns', 'cam',
         # Puntos de restauracion y lo que borra partes de Windows (de mas a menos espacio liberado; el entorno de recuperacion al final)
@@ -3113,15 +3114,15 @@ $OrdenOpc = @{
         # Modo juego y Game Bar: la grabacion de fondo es la que come FPS; el Modo Xbox no cambia FPS
         'dvr', 'gm', 'xb', 'notif', 'xm', 'xbt',
         # CPU y prioridad: afinidad y prioridad alta antes que los de efecto chico
-        'afi', 'pri', 'mm', 'fgb',
+        'afi', 'pri', 'pj',
         # Procesador y plan de energia
         'cpu', 'idle', 'll', 'pw', 'nb',
         # RAM
         'ram', 'sm',
         # Seguridad: VBS e integridad de memoria son las que mas FPS dan; Spectre solo en procesadores viejos y es la mas peligrosa
-        'vbs', 'mi', 'avl', 'spc',
+        'vbs', 'mi', 'spc',
         # Latencia, red, mouse y DNS
-        'tr', 'pe', 'nic', 'dup', 'wf', 'nag', 'v4', 'pci', 'dsk', 'ms', 'vpf', 'esc', 'dns',
+        'tr', 'pe', 'nic', 'dup', 'wf', 'nag', 'pci', 'dsk', 'ms', 'vpf', 'esc', 'dns',
         # Comodidad
         'tk', 'dtk', 'foc', 'fsm', 'du', 'mae', 'wsr', 'stg', 'ext', 'hid', 'md'
     )
@@ -3284,7 +3285,6 @@ function Calcular-NoDisp($i, $cpu) {
     if (-not $i.Bateria) { $r['Gaming|nb'] = 'No hace falta: es para notebooks y tu PC no tiene bateria.' }
     if (@(Navegadores-Instalados).Count -eq 0) { $r['Debloat|eb'] = 'No hace falta: no tenes Edge ni Brave instalados.' }
     if ($i.BtConectado -and @($i.BtConectado).Count -gt 0) { $r['Debloat|bt'] = 'No se puede ahora: tenes conectado por Bluetooth ' + (@($i.BtConectado) -join ', ') + '. Desconectalo (o usa otro) y volve a leer los ajustes.' }
-    if ($i.AvOff) { $r['Gaming|avl'] = 'No hace falta: tu antivirus ya esta apagado.' }
     if ([int]$i.Lan -eq 0) { $r['Gaming|dup'] = 'No hace falta: tu PC no tiene placa de cable.' }
     elseif (([int]$i.DupPlacas -eq 0) -and -not ($i.DrvFalta -and $i.DrvFalta.ContainsKey('Gaming|dup'))) { $r['Gaming|dup'] = 'No hace falta: tu placa de cable es de 1 Gbps o menos.' }
     if (([int]$i.NicPlacas -gt 0) -and ([int]$i.NicOpc -eq 0) -and -not ($i.DrvFalta -and $i.DrvFalta.ContainsKey('Gaming|nic'))) { $r['Gaming|nic'] = 'Tu placa de red no tiene opciones de ahorro de energia para cambiar (depende del driver): no hace falta.' }
@@ -3458,16 +3458,23 @@ function Elegir3([string]$titulo, [string]$mensaje, [string]$b1, [string]$b2) {
 # Windows 11 24H2 o 25H2: por Windows Update. Antes revisa lo que puede impedir la actualizacion (imagen de Windows rota,
 # Windows Update apagado o en pausa, opciones de la app que la frenan, poco espacio, reinicio pendiente), lo arregla y recien
 # despues actualiza. Todo con la barra de progreso de la app y un cartel al final.
+# Lineas de telemetria que agregaban las versiones viejas al archivo hosts (Brio ya no lo toca; "hst" solo las quita)
+function Hosts-Viejo {
+    try { return ([IO.File]::ReadAllText((Join-Path $env:SystemRoot 'System32\drivers\etc\hosts'))).Contains('# xuca-telemetria') } catch { return $false }
+}
 function Actualizar-Windows {
     $b = 0
     try { $b = [int](Leer-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' 'CurrentBuildNumber') } catch { }
     if ($b -ge 26300) { Avisar 'Actualizar Windows' 'Ya tenes Windows 11 26H2 o mas nuevo: no hace falta actualizar.'; return }
     if (-not [Environment]::Is64BitOperatingSystem) { Avisar 'Actualizar Windows' 'Tu Windows es de 32 bits: Windows 11 solo existe en 64 bits, asi que no se puede actualizar desde aca.'; return }
     # Opciones de la app que frenan la actualizacion: se restablecen en la misma pasada
-    $frenos = @('Debloat|wus', 'Debloat|wup', 'Debloat|tsk', 'Debloat|hst') | Where-Object { $script:Estados[$_] -eq $true }
+    $frenos = @(@('Debloat|wus', 'Debloat|wup', 'Debloat|tsk') | Where-Object { $script:Estados[$_] -eq $true })
     $vR = @{ XR_rep = 'S'; XREP_RAPIDO = '1'; XREP_WU = '1' }
     foreach ($k in $frenos) { $vR['XR_' + ($k -split '\|')[1]] = 'R' }
-    $txtF = $(if ($frenos.Count -gt 0) { "`n`n" + (Con-Enie 'Tambien se restablecen estas opciones que frenan la actualizacion:') + ' ' + (@($frenos | ForEach-Object { Titulo-De ($_ -split '\|')[0] ($_ -split '\|')[1] }) -join ', ') + '.' } else { '' })
+    $nomF = @($frenos | ForEach-Object { Titulo-De ($_ -split '\|')[0] ($_ -split '\|')[1] })
+    # El bloqueo de una version vieja en el archivo hosts tapa el servidor de compatibilidad que consulta Windows Update
+    if (Hosts-Viejo) { $vR['XR_hst'] = 'R'; $nomF += (Con-Enie 'el bloqueo de telemetria de una version vieja'); $frenos += 'Debloat|hst' }
+    $txtF = $(if ($nomF.Count -gt 0) { "`n`n" + (Con-Enie 'Tambien se restablecen estas opciones que frenan la actualizacion:') + ' ' + ($nomF -join ', ') + '.' } else { '' })
     $pre = 'Primero revisa lo que puede impedir la actualizacion (archivos de Windows rotos, Windows Update apagado o en pausa, poco espacio) y lo arregla.'
     $vU = @{ XR_ver = 'S' }
     if ($b -ge 26100) {
@@ -4737,11 +4744,23 @@ $spH.Children.Add(($script:CardSin = Nueva-Herramienta 'Entrar a Windows sin con
 # --- Herramienta: volver a encender el antivirus que apagaban las versiones viejas de Brio (la opcion ya no existe) ---
 $bAv = Nuevo-Boton 'Restaurar el antivirus' '#60A5FA'
 $bAv.Add_Click({
-    if (-not (Confirmar 'Restaurar el antivirus' ('Vuelve a encender Defender y SmartScreen como vienen en Windows y quita las politicas que los apagaban.' + "`n`n" + 'La Proteccion contra alteraciones la encendes vos en Seguridad de Windows. Seguir?') 'Restaurar el antivirus' '#60A5FA' 'Cancelar')) { return }
+    if (-not (Confirmar 'Restaurar el antivirus' ('Vuelve a encender Defender y SmartScreen como vienen en Windows y quita las politicas que los apagaban.' + ' ' + 'Tambien devuelve el limite de CPU de los analisis a como viene en Windows.' + "`n`n" + 'La Proteccion contra alteraciones la encendes vos en Seguridad de Windows. Seguir?') 'Restaurar el antivirus' '#60A5FA' 'Cancelar')) { return }
     $script:HerrTitulo = 'Restaurar el antivirus'
-    Correr @([pscustomobject]@{ Nombre = 'Restaurar el antivirus'; Ruta = $Rutas.Debloat; Vars = @{ XR_av = 'R' }; Cambios = 1; Visible = $false; Tipo = 'herroculta' }) $false 'Restaurando el antivirus'
+    # Primero se enciende Defender (Debloat) y despues se le devuelve el limite de CPU que bajaba la opcion vieja "avl" (Gaming)
+    Correr @(
+        [pscustomobject]@{ Nombre = 'Restaurar el antivirus'; Ruta = $Rutas.Debloat; Vars = @{ XR_av = 'R' }; Cambios = 1; Visible = $false; Tipo = 'herroculta' },
+        [pscustomobject]@{ Nombre = 'Restaurar el antivirus'; Ruta = $Rutas.Gaming; Vars = @{ XR_avl = 'R' }; Cambios = 1; Visible = $false; Tipo = 'herroculta' }
+    ) $false 'Restaurando el antivirus'
 })
 $spH.Children.Add((Nueva-Herramienta 'Restaurar el antivirus de Windows' 'vuelve a encender Defender y SmartScreen si los apagaste con una version vieja de Brio.' 'la PC vuelve a estar protegida contra virus.' 'Smart App Control no vuelve sin reinstalar Windows.' @($bAv))) | Out-Null
+# --- Herramienta: quitar el bloqueo de telemetria que agregaban las versiones viejas (la opcion ya no existe). Solo aparece si queda algo ---
+$bHst = Nuevo-Boton 'Quitar el bloqueo viejo' '#60A5FA'
+$bHst.Add_Click({
+    if (-not (Confirmar 'Quitar el bloqueo de telemetria viejo' ('Saca del archivo hosts solo las lineas que agrego una version vieja de Brio para bloquear servidores de telemetria. El resto del archivo queda como estaba.' + "`n`n" + 'Seguir?') 'Quitar el bloqueo viejo' '#60A5FA' 'Cancelar')) { return }
+    $script:HerrTitulo = 'Quitar el bloqueo de telemetria viejo'
+    Correr @([pscustomobject]@{ Nombre = 'Quitar el bloqueo de telemetria viejo'; Ruta = $Rutas.Debloat; Vars = @{ XR_hst = 'R' }; Cambios = 1; Visible = $false; Tipo = 'herroculta' }) $false 'Quitando el bloqueo de telemetria viejo'
+})
+if (Hosts-Viejo) { $spH.Children.Add((Nueva-Herramienta 'Quitar el bloqueo de telemetria de una version vieja' 'saca las lineas que una version vieja de Brio agrego al archivo hosts para bloquear servidores de telemetria. El resto del archivo queda como estaba.' 'Windows Update vuelve a llegar al servidor de compatibilidad (sin eso puede no ofrecerte la version nueva) y Defender deja de avisar por esas lineas.' 'ninguna: la version actual de Brio ya no hace ese bloqueo.' @($bHst))) | Out-Null }
 # Orden en pantalla: primero lo de la cuenta y reparar Windows; el resto queda despues de esas tres
 $posH = 1
 foreach ($cH in @($script:CardSin, $cardLocal, $script:CardRep)) { $spH.Children.Remove($cH); $spH.Children.Insert($posH, $cH); $posH++ }
@@ -5424,7 +5443,7 @@ function Actualizar-Cuentas([bool]$denuevo = $false) {
 # El id original quedo para la parte principal. Todo perfil que tiene la original tiene tambien las nuevas, asi cada perfil
 # aplica exactamente lo mismo que antes (lo revisa tests\Verificar-Opciones.ps1).
 $Divididas = [ordered]@{
-    'Debloat|pv'   = @('pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl')
+    'Debloat|pv'   = @('pvu', 'pvs', 'pve', 'pvv', 'pvm')
     'Debloat|ad'   = @('bng')
     'Debloat|sch'  = @('sns')
     'Debloat|fx'   = @('trn')
@@ -5432,7 +5451,7 @@ $Divididas = [ordered]@{
     'Debloat|cdp'  = @('clh')
     'Debloat|rap'  = @('sud')
     'Debloat|leg'  = @('apl', 'wer')
-    'Debloat|tp'   = @('tpn', 'tps')
+    'Debloat|tp'   = @('tps')
     'Debloat|ia'   = @('iap', 'iao')
     'Gaming|gf'    = @('wgo')
     'Gaming|ext'   = @('hid')
@@ -5444,8 +5463,8 @@ $Perfiles = @(
         Hace = 'saca publicidad, sugerencias, Bing, telemetria, rastreo y Widgets, apaga la IA de Windows, borra las apps basura y apaga servicios que casi nadie usa; suma ajustes comodos para jugar que no tienen riesgo (sin carteles de Teclas especiales, sin bajar el volumen en llamadas, Modo Juego, menus sin retraso).'
         Ideal = 'cualquier PC, incluso la de alguien que no sabe de esto.'
         NoToca = 'la seguridad, el procesador ni tus programas: solo borra lo que viene de fabrica (WhatsApp, Xbox y la Store quedan).'
-        Adv = 'borrar las apps basura no tiene restablecimiento: si queres alguna, la reinstalas desde la Store. Sin los servicios que casi nadie usa, el escaner de Windows y el Media Player viejo dejan de estar.'
-        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'tp', 'tpn', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'db')
+        Adv = 'borrar las apps basura no tiene restablecimiento: si queres alguna, la reinstalas desde la Store. Sin los servicios que casi nadie usa, no podes mandar faxes desde Windows y las apps no encuentran tu ubicacion.'
+        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvs', 'pve', 'pvv', 'pvm', 'tp', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'db')
         G = @('tk', 'du', 'gm', 'ext', 'hid', 'md')
     },
     [pscustomobject]@{
@@ -5454,7 +5473,7 @@ $Perfiles = @(
         Ideal = 'cualquier PC que queres que ande mas rapida y liviana, sin tocar la seguridad ni los ajustes de juego.'
         NoToca = 'el antivirus, BitLocker, la integridad de memoria ni VBS, ni los ajustes de juego competitivo (mouse, procesador, plan de energia, temporizador y red).'
         Adv = 'borrar las apps basura no tiene restablecimiento: si queres alguna, la reinstalas desde la Store. Los drivers los actualizas vos (Herramientas > Buscar drivers, o la app de tu placa de video).'
-        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'tp', 'tpn', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'db', 'hib', 'fx', 'trn', 'sch', 'sns', 'wud', 'ini', 'tsk', 'fsb', 'upd')
+        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvs', 'pve', 'pvv', 'pvm', 'tp', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'db', 'hib', 'fx', 'trn', 'sch', 'sns', 'wud', 'ini', 'tsk', 'fsb', 'upd')
         G = @('tk', 'du', 'gm', 'ext', 'hid', 'md', 'sm', 'pca', 'stg')
     },
     [pscustomobject]@{
@@ -5464,7 +5483,7 @@ $Perfiles = @(
         NoToca = 'el antivirus (ni sus analisis), BitLocker, la integridad de memoria ni VBS, ni el plan de energia ni el procesador (nada de Alto rendimiento, Modo Nitro ni Baja latencia); tampoco borra apps.'
         Adv = 'el Modo Nitro, el plan Alto rendimiento y la Baja latencia no estan incluidos a proposito: suben mucho la temperatura, incluso en reposo. Si los queres, activalos a mano en Gaming y mira las temperaturas.'
         D = @('fx', 'trn', 'ini')
-        G = @('ms', 'tk', 'du', 'mm', 'afi', 'gm', 'xb', 'notif', 'pca', 'tr', 'sm', 'dns', 'md', 'fgb')
+        G = @('ms', 'tk', 'du', 'pj', 'afi', 'gm', 'xb', 'notif', 'pca', 'tr', 'sm', 'dns', 'md')
     },
     [pscustomobject]@{
         Id = 'ramlow'; Nombre = 'RAM liviana'; Color = '#60A5FA'
@@ -5473,8 +5492,10 @@ $Perfiles = @(
         NoToca = 'el antivirus, BitLocker, la integridad de memoria ni VBS, ni los ajustes de juego competitivo. Tampoco apaga los servicios de Xbox ni Gaming Services: Game Pass y Minecraft siguen andando.'
         Adv = 'la zona wifi movil deja de andar y Windows deja de buscar problemas solo. Borrar las apps basura no tiene restablecimiento. Juntar los servicios se aplica al reiniciar. En reposo ronda los 2,5 a 3 GB: bajar de ahi solo se logra con una imagen de Windows recortada.'
         Estima = '2,5 a 3,5 GB de RAM y 0 a 2 % de CPU, sin nada abierto en Windows 11 (estimado, no medido; depende del hardware y los drivers).'
-        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'tp', 'tpn', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'rsv', 'dia', 'svh', 'mc', 'ofb', 'db', 'fx', 'trn', 'sch', 'sns', 'ini', 'tsk', 'cdp', 'clh', 'fsb', 'rap', 'sud', 'upd')
+        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvs', 'pve', 'pvv', 'pvm', 'tp', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'rsv', 'svh', 'mc', 'ofb', 'db', 'fx', 'trn', 'sch', 'sns', 'ini', 'tsk', 'cdp', 'clh', 'fsb', 'rap', 'sud', 'upd')
         G = @('tk', 'du', 'gm', 'ext', 'hid', 'md', 'pca', 'stg')
+        # "Diagnostico en manual" (dia) paso a ser un servicio de "Servicios del Sistema": el perfil lo sigue apagando
+        Rsv = @('dia')
     },
     [pscustomobject]@{
         Id = 'tiny'; Nombre = 'RAM minima'; Color = '#60A5FA'
@@ -5483,10 +5504,10 @@ $Perfiles = @(
         NoToca = 'los ajustes de juego competitivo, ni Edge ni Chrome. Crea un punto de restauracion antes de empezar.'
         Adv = 'la PC queda sin parches de seguridad (Windows Update apagado), sin Store ni Bluetooth, y dejan de andar WSL, Docker y las maquinas virtuales. Si el disco estaba cifrado con BitLocker, la PC va mas lenta hasta que termine de descifrarse. Para pasar de ahi hace falta una ISO recortada (tiny11 o NTLite): desde una Windows instalada no se llega a 0,5 GB.'
         Estima = 'alrededor de 3 GB de RAM en uso, sin nada abierto en Windows 11 (medido en una PC real; varia con el hardware y los drivers). Para bajar de ahi hace falta una ISO recortada (tiny11 o NTLite).'
-        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'tp', 'tpn', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'rsv', 'dia', 'svh', 'mc', 'ofb', 'db', 'hib', 'fx', 'trn', 'sch', 'sns', 'bl', 'ini', 'tsk', 'cdp', 'clh', 'fsb', 'rap', 'sud', 'upd', 'rmin', 'nvl', 'nvt', 'thm', 'leg', 'apl', 'wer', 'bt', 'msx', 'old', 'usv', 'wus')
+        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvs', 'pve', 'pvv', 'pvm', 'tp', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'rsv', 'svh', 'mc', 'ofb', 'db', 'hib', 'fx', 'trn', 'sch', 'sns', 'bl', 'ini', 'tsk', 'cdp', 'clh', 'fsb', 'rap', 'sud', 'upd', 'rmin', 'nvx', 'nvt', 'thm', 'leg', 'apl', 'wer', 'bt', 'msx', 'old', 'usv', 'wus')
         G = @('tk', 'du', 'gm', 'ext', 'hid', 'md', 'pca', 'stg', 'mi', 'vbs', 'wsr', 'dvr')
         # Opciones sueltas que pasaron a ser servicios de "Servicios del Sistema" (De en $Elegibles.rsv): el perfil los sigue apagando
-        Rsv = @('rnet', 'rdp')
+        Rsv = @('rnet', 'rdp', 'dia')
     },
     [pscustomobject]@{
         Id = 'nbdeb'; Nombre = 'Debloat - Notebook'; Color = '#60A5FA'
@@ -5494,7 +5515,7 @@ $Perfiles = @(
         Ideal = 'una notebook para estudiar, trabajar o usar todos los dias: la bateria dura mas y anda mas liviana.'
         NoToca = 'la seguridad, la hibernacion (la notebook la usa cuando se queda sin bateria), los drivers de Windows Update, tus programas ni el rendimiento enchufada.'
         Adv = 'borrar las apps basura no tiene restablecimiento: si queres alguna, la reinstalas desde la Store.'
-        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'tp', 'tpn', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'db', 'fx', 'trn', 'ini', 'tsk', 'upd')
+        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvs', 'pve', 'pvv', 'pvm', 'tp', 'tps', 'eb', 'ia', 'iap', 'iao', 'sv', 'db', 'fx', 'trn', 'ini', 'tsk', 'upd')
         G = @('tk', 'du', 'gm', 'ext', 'hid', 'md', 'nb')
     },
     [pscustomobject]@{
@@ -5504,16 +5525,16 @@ $Perfiles = @(
         NoToca = 'el antivirus (ni sus analisis), la integridad de memoria ni VBS. Tampoco pone el plan Alto rendimiento, el temporizador al minimo ni apaga el ahorro de energia de USB, PCIe y red, porque gastan bateria todo el tiempo.'
         Adv = 'para jugar, enchufa la notebook: a bateria rinde menos a proposito. El Modo Nitro y el plan Alto rendimiento no estan incluidos: en una notebook suben mucho la temperatura.'
         D = @('ini')
-        G = @('ms', 'tk', 'du', 'mm', 'afi', 'gm', 'xb', 'notif', 'pca', 'sm', 'nag', 'dns', 'md', 'v4', 'nb')
+        G = @('ms', 'tk', 'du', 'pj', 'afi', 'gm', 'xb', 'notif', 'pca', 'sm', 'nag', 'dns', 'md', 'nb')
     },
     [pscustomobject]@{
         Id = 'full'; Nombre = 'Full Optimizado'; Color = '#F28B82'
-        Hace = 'Windows lo mas liviano posible: todo el debloat y la optimizacion del sistema, y ademas apaga BitLocker, bloquea la telemetria en hosts y apaga Teredo y Windows Search. No toca la integridad de memoria ni VBS.'
+        Hace = 'Windows lo mas liviano posible: todo el debloat y la optimizacion del sistema, y ademas apaga BitLocker, Teredo y Windows Search. No toca la integridad de memoria ni VBS.'
         Ideal = 'una PC justa o vieja que necesita todo el rendimiento del sistema, sabiendo lo que haces.'
         NoToca = 'la integridad de memoria ni VBS, los ajustes de juego competitivo (mouse, prioridad, afinidad, plan de energia, temporizador y red), ni Edge ni Chrome. Crea un punto de restauracion antes de empezar.'
         Adv = 'borra Riot Vanguard y cierra Riot (lo reinstalas abriendo el cliente de Riot), y deja de andar WSL, Docker y las maquinas virtuales. REINICIA LA PC SIN FALTA antes de volver a instalar Vanguard (o abrir VALORANT o LoL): si lo instalas sin reiniciar pueden salir errores y bucles de instalacion.'
-        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvw', 'pvs', 'pve', 'pvv', 'pvm', 'pvl', 'tp', 'tpn', 'tps', 'eb', 'su', 'ia', 'iap', 'iao', 'hib', 'fx', 'trn', 'sch', 'sns', 'sv', 'wud', 'db', 'bl', 'hst', 'ter', 'ini', 'tsk', 'cdp', 'clh', 'fsb', 'rap', 'sud', 'upd', 'old')
-        G = @('tk', 'du', 'gm', 'ext', 'hid', 'md', 'mm', 'xb', 'gf', 'wgo', 'pca', 'ram', 'sm', 'stg', 'wsr')
+        D = @('rc', 'et', 'apps', 'tel', 'wg', 'tvb', 'do', 'ad', 'bng', 'pv', 'pvu', 'pvs', 'pve', 'pvv', 'pvm', 'tp', 'tps', 'eb', 'su', 'ia', 'iap', 'iao', 'hib', 'fx', 'trn', 'sch', 'sns', 'sv', 'wud', 'db', 'bl', 'ter', 'ini', 'tsk', 'cdp', 'clh', 'fsb', 'rap', 'sud', 'upd', 'old')
+        G = @('tk', 'du', 'gm', 'ext', 'hid', 'md', 'pj', 'xb', 'gf', 'wgo', 'pca', 'ram', 'sm', 'stg', 'wsr')
     }
 )
 
@@ -7517,7 +7538,7 @@ function Leer-Dispositivos {
 }
 # Opcion -> que dispositivos puede afectar y por que. Cat = categorias de Leer-Dispositivos.
 $DispRiesgo = [ordered]@{
-    'Gaming|mm'   = @{ Cat = @('audio', 'midi', 'asio'); Por = 'cambia la prioridad de CPU entre programas: la musica en vivo puede cortarse o tener mas latencia.' }
+    'Gaming|pj'   = @{ Cat = @('audio', 'midi', 'asio'); Por = 'cambia la prioridad de CPU entre programas: la musica en vivo puede cortarse o tener mas latencia.' }
     'Gaming|tr'   = @{ Cat = @('audio', 'midi', 'asio'); Por = 'cambia el temporizador del sistema: puede variar la latencia de audio y MIDI.' }
     'Gaming|idle' = @{ Cat = @('audio', 'midi', 'asio'); Por = 'cambia los estados de reposo del procesador: pueden aparecer clicks o cortes de audio.' }
     'Gaming|pci'  = @{ Cat = @('audio', 'midi', 'asio'); Por = 'cambia el ahorro de energia de PCIe: una placa de audio PCIe o Thunderbolt puede cortarse.' }
@@ -7755,6 +7776,10 @@ function Aplicar-Seleccion([string]$perfil = '') {
         # Los que antes eran opciones sueltas (De) solo si el perfil tenia esa opcion (campo Rsv)
         $deTiny = @((Perfil-De 'tiny').Rsv)
         $vD['XSEL_rsv'] = (@($script:Elegibles.rsv | Where-Object { (-not $_.Aviso) -and (-not ($_.Nb -and $script:EsNotebook)) -and ((-not $_.De) -or ($deTiny -contains $_.De)) } | ForEach-Object { $_.Id }) -join "`t")
+    } elseif ($perfil -and ($selD -contains 'rsv') -and (@((Perfil-De $perfil).Rsv | Where-Object { $_ }).Count -gt 0)) {
+        # Los demas perfiles: los Seguros de siempre (como sin submenu) y los servicios de las opciones sueltas que tenia el perfil (campo Rsv)
+        $dePf = @((Perfil-De $perfil).Rsv)
+        $vD['XSEL_rsv'] = (@($script:Elegibles.rsv | Where-Object { ($_.Def -and (-not ($_.Nb -and $script:EsNotebook))) -or ($_.De -and ($dePf -contains $_.De)) } | ForEach-Object { $_.Id }) -join "`t")
     }
     foreach ($id in $selD) { $vD['XR_' + $id] = 'S' }
 
