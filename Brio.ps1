@@ -15,6 +15,14 @@ function Marca-Inicio([string]$n) { $TiemposInicio.Add(('{0,7} ms  {1}' -f $Tiem
 
 $ErrorActionPreference = 'Stop'
 
+# Solo Windows 10 y 11: en uno mas viejo avisa y se cierra antes de pedir administrador. La build sale del registro
+# (como en el resto de la app); si no se puede leer, sigue de largo para no frenar nunca un Windows 10 u 11.
+$bInicio = 0; try { $bInicio = [int](Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -ErrorAction Stop).CurrentBuildNumber } catch { }
+if (($bInicio -gt 0) -and ($bInicio -lt 10240)) {
+    try { Add-Type -AssemblyName System.Windows.Forms; [void][Windows.Forms.MessageBox]::Show(($NombreApp + ' necesita Windows 10 u 11.'), $NombreApp, 'OK', 'Error') } catch { Write-Host ($NombreApp + ' necesita Windows 10 u 11.') }
+    exit
+}
+
 # --- Permisos de administrador ---
 $yo = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if (-not $yo.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -395,14 +403,13 @@ function Leer-Opciones([string]$ruta, [string]$pag) {
     $errPs = $null
     [void][Management.Automation.Language.Parser]::ParseInput($txt, [ref]$null, [ref]$errPs)
     if (@($errPs).Count -gt 0) { throw ((Split-Path -Leaf $ruta) + ' tiene un error en la linea ' + $errPs[0].Extent.StartLineNumber + ': ' + $errPs[0].Message) }
-    $def = & { . ([scriptblock]::Create($args[0])); @{ Lista = $ListaOpciones; Win10 = @($SoloWin10); Elegibles = $Elegibles; Keep = $KeepModernas } } $txt
+    $def = & { . ([scriptblock]::Create($args[0])); @{ Lista = $ListaOpciones; Elegibles = $Elegibles; Keep = $KeepModernas } } $txt
     if ($def.Elegibles) { $script:Elegibles = $def.Elegibles; $script:KeepModernas = $def.Keep }
     foreach ($o in @($def.Lista)) {
         if ((-not $o) -or ($SoloScript -contains $o.Id)) { continue }
-        # Win10 = usa comandos que Windows 7 y 8 no tienen (lista $SoloWin10 del script)
         $qc = Titulo-Corto $o.Q
         $tc = $TitulosCortos[$pag + '|' + $o.Id]
-        $it = [pscustomobject]@{ Id = $o.Id; Titulo = $(if ($tc) { $tc } else { $qc }); Hace = (Sin-R $o.Hace); Favor = (Sin-R $o.Favor); Contra = (Sin-R $o.Contra); ConR = [bool]$o.R; Seccion = $o.Seccion; Win10 = (@($def.Win10) -contains $o.Id) }
+        $it = [pscustomobject]@{ Id = $o.Id; Titulo = $(if ($tc) { $tc } else { $qc }); Hace = (Sin-R $o.Hace); Favor = (Sin-R $o.Favor); Contra = (Sin-R $o.Contra); ConR = [bool]$o.R; Seccion = $o.Seccion }
         $fav = $Favoritas[$pag + '|' + $o.Id]
         if ($fav) { $it.Hace = $it.Hace.TrimEnd('.') + ' (' + $fav + ').' }
         Traducir-Opcion $pag $it
@@ -3242,14 +3249,10 @@ function Calcular-NoDisp($i, $cpu) {
     $r = @{}
     if (-not $i) { return $r }
     $b = [int]$i.Build
-    $tuyo = $(if ($b -ge 22000) { 'Windows 11' } elseif ($b -ge 10240) { 'Windows 10' } elseif ($b -ge 9200) { 'Windows 8' } else { 'Windows 7' })
+    $tuyo = $(if ($b -ge 22000) { 'Windows 11' } else { 'Windows 10' })
     if ($i.Display) { $tuyo += (' ' + $i.Display) }
     $tuyo += (' (build ' + $b + ')')
     $nv = 'Tu Windows no lo soporta: necesita '
-    # Windows 7 y 8: lo que usa comandos de Windows 10 u 11 queda en gris (los scripts tambien lo saltean)
-    if (($b -gt 0) -and ($b -lt 10240)) {
-        foreach ($pg in 'Debloat', 'Gaming') { foreach ($it in $Opciones[$pg]) { if ($it.Win10) { $r[$pg + '|' + $it.Id] = ($nv + 'Windows 10 u 11. Tenes ' + $tuyo + '.') } } }
-    }
     if ($b -lt 26100) { $r['Debloat|rc'] = ($nv + 'Windows 11 24H2 o mas nuevo en una PC Copilot+. Tenes ' + $tuyo + '.') }
     elseif (-not $i.Recall) { $r['Debloat|rc'] = 'Tu PC no tiene Recall: solo viene en las PCs Copilot+ (con NPU).' }
     if ($b -lt 22621) { $r['Debloat|et'] = ($nv + 'Windows 11 22H2 o mas nuevo. Tenes ' + $tuyo + '.') }
@@ -5267,7 +5270,7 @@ function Poner-Insignia([int]$n) {
 
 # Circulitos de las demas paginas (mismo estilo que el de Configs). Se cuentan los items que la app cargo, nunca un numero fijo:
 #   Perfiles: los perfiles. Debloat y Gaming: las opciones que podes usar en esta PC (no cuentan las que la app muestra en gris
-#   como no compatibles: version de Windows, $SoloWin10 en Windows 7 y 8, hardware que no tenes). Limpiar cache: las opciones
+#   como no compatibles: version de Windows, hardware que no tenes). Limpiar cache: las opciones
 #   para marcar. Herramientas: las herramientas. Apps recomendadas: las apps. Inicio no tiene.
 # Se llama al abrir y cada vez que se termina de leer Windows (ahi se sabe que no es compatible).
 function Contar-Tarjetas($panel, [bool]$soloBuscables) {
@@ -5280,11 +5283,9 @@ function Contar-Tarjetas($panel, [bool]$soloBuscables) {
     return $n
 }
 function Actualizar-Insignias {
-    $viejo = ([Environment]::OSVersion.Version.Build -lt 10240)
     $c = [ordered]@{ Perfiles = @($Perfiles).Count }
     foreach ($p in 'Debloat', 'Gaming') {
-        # Antes de leer Windows solo se sabe lo de Windows 7 y 8; despues manda la lista de no compatibles
-        $c[$p] = @($Opciones[$p] | Where-Object { -not ($script:NoDisp.ContainsKey($p + '|' + $_.Id) -or ((-not $script:Leido) -and $viejo -and $_.Win10)) }).Count
+        $c[$p] = @($Opciones[$p] | Where-Object { -not $script:NoDisp.ContainsKey($p + '|' + $_.Id) }).Count
     }
     $c.Limpieza = @($Casillas.Limpieza.Keys).Count
     $c.Herr = Contar-Tarjetas $Paginas.Herr $false

@@ -5,7 +5,7 @@ if not exist "%~dp0Brio.ps1" goto falta
 start "" /min "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -STA -File "%~dp0Brio.ps1"
 exit /b
 :ps
-echo Falta PowerShell 5.1. En Windows 7 SP1 instala WMF 5.1: https://aka.ms/wmf51download
+echo Falta PowerShell 5.1. Brio necesita Windows 10 u 11.
 pause
 exit /b
 :falta
